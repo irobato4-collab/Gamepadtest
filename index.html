@@ -8,24 +8,21 @@
 <h1>ゲームパッドボタン押下テスト</h1>
 <p id="status">ボタンを押してください</p>
 
-<!-- ここで外部ゲームパッドを読み込む -->
+<!-- 外部ゲームパッド -->
 <script src="d.js"></script>
 
 <script>
-// 表示用要素取得
 const status = document.getElementById("status");
 
-// 受け取るカスタムイベント一覧
-const buttons = ["gp-A", "gp-B", "gp-X", "gp-Y",
-                 "gp-L", "gp-R", "gp-up", "gp-down", "gp-left", "gp-right",
-                 "gp-start", "gp-select"];
+const buttons = ["gp-A","gp-B","gp-X","gp-Y",
+                 "gp-L","gp-R","gp-up","gp-down","gp-left","gp-right",
+                 "gp-start","gp-select"];
 
-// 各ボタンのカスタムイベントを監視
 buttons.forEach(btnId => {
     document.addEventListener(btnId + "-pressed", () => {
-        status.textContent = btnId + " が押されました！";
+        status.textContent = btnId.replace("gp-","") + " が押されました！";
     });
 });
 </script>
 </body>
-  </html>
+</html>
