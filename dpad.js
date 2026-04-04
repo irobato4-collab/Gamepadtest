@@ -1,12 +1,10 @@
 (function () {
 
-  // ===== 状態 =====
   window.gamepadState = {
     up:false, down:false, left:false, right:false,
     A:false, B:false, X:false, Y:false
   };
 
-  // ===== HTML =====
   document.body.insertAdjacentHTML("beforeend", `
     <div id="zone"></div>
 
@@ -18,7 +16,6 @@
     </div>
   `);
 
-  // ===== CSS =====
   const style = document.createElement("style");
   style.textContent = `
     #zone {
@@ -99,57 +96,28 @@
     right: zone.querySelector(".right")
   };
 
-  let dpadTouchId = null;
-
-  function handleDpadStart(e) {
+  function handleDpad(e) {
     const rect = zone.getBoundingClientRect();
 
-    for (let t of e.changedTouches) {
-      if (
-        t.clientX >= rect.left && t.clientX <= rect.right &&
-        t.clientY >= rect.top && t.clientY <= rect.bottom
-      ) {
-        dpadTouchId = t.identifier;
-      }
-    }
-
-    updateDpad(e);
-  }
-
-  function handleDpadMove(e) {
-    if (dpadTouchId === null) return;
-    updateDpad(e);
-  }
-
-  function handleDpadEnd(e) {
-    for (let t of e.changedTouches) {
-      if (t.identifier === dpadTouchId) {
-        dpadTouchId = null;
-        resetDir();
-      }
-    }
-  }
-
-  function resetDir() {
+    // 初期化
     gamepadState.up = false;
     gamepadState.down = false;
     gamepadState.left = false;
     gamepadState.right = false;
     Object.values(dirs).forEach(d => d.classList.remove("active"));
-  }
-
-  function updateDpad(e) {
-    const rect = zone.getBoundingClientRect();
-
-    resetDir();
 
     for (let t of e.touches) {
-      if (t.identifier !== dpadTouchId) continue;
+
+      // 👉 zone内の指だけ使う（超重要）
+      if (
+        t.clientX < rect.left || t.clientX > rect.right ||
+        t.clientY < rect.top || t.clientY > rect.bottom
+      ) continue;
 
       const x = t.clientX - (rect.left + rect.width / 2);
       const y = t.clientY - (rect.top + rect.height / 2);
 
-      if (Math.abs(x) < 10 && Math.abs(y) < 10) return;
+      if (Math.abs(x) < 10 && Math.abs(y) < 10) continue;
 
       if (Math.abs(x) > Math.abs(y)) {
         if (x > 0) {
@@ -171,10 +139,10 @@
     }
   }
 
-  zone.addEventListener("touchstart", handleDpadStart, { passive:false });
-  zone.addEventListener("touchmove", handleDpadMove, { passive:false });
-  zone.addEventListener("touchend", handleDpadEnd);
-  zone.addEventListener("touchcancel", handleDpadEnd);
+  zone.addEventListener("touchstart", handleDpad, { passive:false });
+  zone.addEventListener("touchmove", handleDpad, { passive:false });
+  zone.addEventListener("touchend", handleDpad);
+  zone.addEventListener("touchcancel", handleDpad);
 
   // ===== ボタン =====
   const pad = document.getElementById("pad");
@@ -186,50 +154,23 @@
     Y: document.getElementById("btnY")
   };
 
-  let padTouchId = null;
-
-  function handlePadStart(e) {
+  function handlePad(e) {
     const rect = pad.getBoundingClientRect();
 
-    for (let t of e.changedTouches) {
-      if (
-        t.clientX >= rect.left && t.clientX <= rect.right &&
-        t.clientY >= rect.top && t.clientY <= rect.bottom
-      ) {
-        padTouchId = t.identifier;
-      }
-    }
-
-    updatePad(e);
-  }
-
-  function handlePadMove(e) {
-    if (padTouchId === null) return;
-    updatePad(e);
-  }
-
-  function handlePadEnd(e) {
-    for (let t of e.changedTouches) {
-      if (t.identifier === padTouchId) {
-        padTouchId = null;
-        resetButtons();
-      }
-    }
-  }
-
-  function resetButtons() {
+    // 初期化
     gamepadState.A = false;
     gamepadState.B = false;
     gamepadState.X = false;
     gamepadState.Y = false;
     Object.values(btnMap).forEach(b => b.classList.remove("active"));
-  }
-
-  function updatePad(e) {
-    resetButtons();
 
     for (let t of e.touches) {
-      if (t.identifier !== padTouchId) continue;
+
+      // 👉 pad内だけ（これが最重要）
+      if (
+        t.clientX < rect.left || t.clientX > rect.right ||
+        t.clientY < rect.top || t.clientY > rect.bottom
+      ) continue;
 
       for (let key in btnMap) {
         const b = btnMap[key].getBoundingClientRect();
@@ -247,9 +188,9 @@
     }
   }
 
-  pad.addEventListener("touchstart", handlePadStart, { passive:false });
-  pad.addEventListener("touchmove", handlePadMove, { passive:false });
-  pad.addEventListener("touchend", handlePadEnd);
-  pad.addEventListener("touchcancel", handlePadEnd);
+  pad.addEventListener("touchstart", handlePad, { passive:false });
+  pad.addEventListener("touchmove", handlePad, { passive:false });
+  pad.addEventListener("touchend", handlePad);
+  pad.addEventListener("touchcancel", handlePad);
 
 })();
