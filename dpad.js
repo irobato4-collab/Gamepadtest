@@ -1,5 +1,6 @@
 (function () {
 
+  // ⭐ 状態
   window.gamepadState = {
     up: false,
     down: false,
@@ -11,6 +12,7 @@
     Y: false
   };
 
+  // ===== HTML =====
   document.body.insertAdjacentHTML("beforeend", `
     <div id="zone"></div>
 
@@ -22,6 +24,7 @@
     </div>
   `);
 
+  // ===== CSS =====
   const style = document.createElement("style");
   style.textContent = `
     #zone {
@@ -30,6 +33,7 @@
       left:60px;
       width:180px;
       height:180px;
+      touch-action:none; /* ←超重要 */
     }
 
     .dir {
@@ -93,6 +97,7 @@
   `;
   document.head.appendChild(style);
 
+  // ===== D-pad生成 =====
   const zone = document.getElementById("zone");
   zone.innerHTML = `
     <div class="dir up"></div>
@@ -102,23 +107,23 @@
   `;
 
   const dirs = {
-    up: document.querySelector(".up"),
-    down: document.querySelector(".down"),
-    left: document.querySelector(".left"),
-    right: document.querySelector(".right")
+    up: zone.querySelector(".up"),
+    down: zone.querySelector(".down"),
+    left: zone.querySelector(".left"),
+    right: zone.querySelector(".right")
   };
 
-  function reset() {
-    for (let k in gamepadState) {
-      if (["up","down","left","right"].includes(k)) {
-        gamepadState[k] = false;
-      }
-    }
+  function resetDir() {
+    gamepadState.up = false;
+    gamepadState.down = false;
+    gamepadState.left = false;
+    gamepadState.right = false;
+
     Object.values(dirs).forEach(d => d.classList.remove("active"));
   }
 
   function updateDirection(x, y) {
-    reset();
+    resetDir();
 
     const absX = Math.abs(x);
     const absY = Math.abs(y);
@@ -144,26 +149,27 @@
 
   let rect;
 
-  zone.addEventListener("touchstart", e => {
-    rect = zone.getBoundingClientRect();
-    handleTouch(e);
-  });
-
-  zone.addEventListener("touchmove", e => {
-    handleTouch(e);
-  });
-
-  zone.addEventListener("touchend", reset);
-  zone.addEventListener("touchcancel", reset);
-
   function handleTouch(e) {
+    e.preventDefault();
+
     const touch = e.touches[0];
     const x = touch.clientX - (rect.left + rect.width / 2);
     const y = touch.clientY - (rect.top + rect.height / 2);
+
     updateDirection(x, y);
   }
 
-  // ボタン
+  zone.addEventListener("touchstart", e => {
+    rect = zone.getBoundingClientRect();
+    handleTouch(e);
+  }, { passive: false });
+
+  zone.addEventListener("touchmove", handleTouch, { passive: false });
+
+  zone.addEventListener("touchend", resetDir);
+  zone.addEventListener("touchcancel", resetDir);
+
+  // ===== ボタン =====
   function setupButton(id, key) {
     const btn = document.getElementById(id);
 
