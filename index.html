@@ -2,23 +2,44 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<title>ジャンプゲーム</title>
+<title>敵ありゲーム</title>
 
 <style>
 body {
   margin: 0;
+  background: black;
+  overflow: hidden;
+}
+
+#container {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+#game {
+  position: relative;
+  width: 800px;
+  height: 450px;
   background: #222;
   overflow: hidden;
 }
 
-/* キャラ */
+/* プレイヤー */
 #player {
   position: absolute;
   width: 50px;
   height: 50px;
   background: cyan;
-  left: 100px;
-  top: 100px;
+}
+
+/* 敵 */
+.enemy {
+  position: absolute;
+  width: 50px;
+  height: 50px;
+  background: red;
 }
 
 /* 地面 */
@@ -34,51 +55,106 @@ body {
 
 <body>
 
-<div id="player"></div>
-<div id="ground"></div>
+<div id="container">
+  <div id="game">
+    <div id="player"></div>
+    <div class="enemy" id="enemy"></div>
+    <div id="ground"></div>
+  </div>
+</div>
 
-<!-- ⭐ 自分のgamepad.js -->
+<!-- ⭐ ローカル読み込み -->
 <script src="gamepad.js"></script>
 
 <script>
+const game = document.getElementById("game");
+const container = document.getElementById("container");
 const player = document.getElementById("player");
+const enemy = document.getElementById("enemy");
 
+const GAME_WIDTH = 800;
+const GAME_HEIGHT = 450;
+
+// プレイヤー
 let x = 100;
 let y = 100;
-
-// ⭐ 物理っぽい設定
 let velocityY = 0;
+
+// 敵
+let enemyX = 500;
+let enemyY = GAME_HEIGHT - 80 - 50;
+let enemyDir = -2;
+
 const gravity = 0.5;
 const jumpPower = -10;
+const groundY = GAME_HEIGHT - 80 - 50;
 
-const groundY = window.innerHeight - 80 - 50; // 地面の位置
+// リサイズ
+function resize() {
+  const scale = Math.min(
+    window.innerWidth / GAME_WIDTH,
+    window.innerHeight / GAME_HEIGHT
+  );
+  container.style.transform =
+    `translate(-50%, -50%) scale(${scale})`;
+}
+window.addEventListener("resize", resize);
+resize();
+
+// 当たり判定
+function isColliding(aX, aY, bX, bY) {
+  return (
+    aX < bX + 50 &&
+    aX + 50 > bX &&
+    aY < bY + 50 &&
+    aY + 50 > bY
+  );
+}
+
+function resetPlayer() {
+  x = 100;
+  y = 100;
+  velocityY = 0;
+}
 
 function gameLoop() {
 
   const g = window.gamepadState;
 
-  // 横移動
+  // プレイヤー移動
   if (g.left) x -= 4;
   if (g.right) x += 4;
 
-  // ⭐ ジャンプ（地面にいるときだけ）
   if (g.A && y >= groundY) {
     velocityY = jumpPower;
   }
 
-  // 重力
   velocityY += gravity;
   y += velocityY;
 
-  // 地面に着地
   if (y > groundY) {
     y = groundY;
     velocityY = 0;
   }
 
-  // 画面に反映
+  // ⭐ 敵の動き（左右に往復）
+  enemyX += enemyDir;
+
+  if (enemyX < 200 || enemyX > 700) {
+    enemyDir *= -1;
+  }
+
+  // ⭐ 当たったらリセット
+  if (isColliding(x, y, enemyX, enemyY)) {
+    resetPlayer();
+  }
+
+  // 描画
   player.style.left = x + "px";
   player.style.top = y + "px";
+
+  enemy.style.left = enemyX + "px";
+  enemy.style.top = enemyY + "px";
 
   requestAnimationFrame(gameLoop);
 }
