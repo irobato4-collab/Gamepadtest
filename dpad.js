@@ -13,7 +13,7 @@
       <div class="hit hit-left"></div>
       <div class="hit hit-right"></div>
 
-      <!-- 見た目 -->
+      <!-- 見た目（杭） -->
       <div class="stick stick-up"></div>
       <div class="stick stick-down"></div>
       <div class="stick stick-left"></div>
@@ -51,44 +51,75 @@
     .hit-left { clip-path: polygon(50% 50%, 0% 0%, 0% 100%); }
     .hit-right { clip-path: polygon(50% 50%, 100% 0%, 100% 100%); }
 
-    /* ===== 見た目 ===== */
+    /* ===== 杭（ここが重要） ===== */
     .stick {
       position:absolute;
       left:50%;
       top:50%;
       background:white;
-      opacity:0.4;
+      opacity:0.5;
       pointer-events:none;
-      border-radius:10px;
+      transition:opacity 0.05s;
     }
 
     .stick.active {
       opacity:1;
     }
 
-    /* ⭐ 正しいDpad形 */
+    /* ⭐ 上（杭） */
     .stick-up {
       width:55px;
       height:100px;
       transform:translate(-50%, -100%);
+      clip-path: polygon(
+        50% 0%,   /* 先端 */
+        100% 30%,
+        100% 100%,
+        0% 100%,
+        0% 30%
+      );
     }
 
+    /* ⭐ 下 */
     .stick-down {
       width:55px;
       height:100px;
       transform:translate(-50%, 0%);
+      clip-path: polygon(
+        0% 0%,
+        100% 0%,
+        100% 70%,
+        50% 100%, /* 先端 */
+        0% 70%
+      );
     }
 
+    /* ⭐ 左 */
     .stick-left {
       width:100px;
       height:55px;
       transform:translate(-100%, -50%);
+      clip-path: polygon(
+        0% 50%,   /* 先端 */
+        30% 0%,
+        100% 0%,
+        100% 100%,
+        30% 100%
+      );
     }
 
+    /* ⭐ 右 */
     .stick-right {
       width:100px;
       height:55px;
       transform:translate(0%, -50%);
+      clip-path: polygon(
+        0% 0%,
+        70% 0%,
+        100% 50%, /* 先端 */
+        70% 100%,
+        0% 100%
+      );
     }
 
     /* ===== ABXY ===== */
@@ -125,7 +156,7 @@
   `;
   document.head.appendChild(style);
 
-  // ===== D-pad =====
+  // ===== D-pad処理 =====
   const zone = document.getElementById("zone");
 
   const sticks = {
@@ -188,45 +219,5 @@
   zone.addEventListener("touchmove", handleDpad, { passive:false });
   zone.addEventListener("touchend", handleDpad);
   zone.addEventListener("touchcancel", handleDpad);
-
-  // ===== ABXY（そのまま） =====
-  const pad = document.getElementById("pad");
-
-  const btnMap = {
-    A: document.getElementById("btnA"),
-    B: document.getElementById("btnB"),
-    X: document.getElementById("btnX"),
-    Y: document.getElementById("btnY")
-  };
-
-  function handlePad(e) {
-    const next = { A:false, B:false, X:false, Y:false };
-
-    for (let t of e.touches) {
-      for (let key in btnMap) {
-        const r = btnMap[key].getBoundingClientRect();
-        const margin = 12;
-
-        if (
-          t.clientX >= r.left - margin &&
-          t.clientX <= r.right + margin &&
-          t.clientY >= r.top - margin &&
-          t.clientY <= r.bottom + margin
-        ) {
-          next[key] = true;
-        }
-      }
-    }
-
-    for (let key in btnMap) {
-      gamepadState[key] = next[key];
-      btnMap[key].classList.toggle("active", next[key]);
-    }
-  }
-
-  pad.addEventListener("touchstart", handlePad, { passive:false });
-  pad.addEventListener("touchmove", handlePad, { passive:false });
-  pad.addEventListener("touchend", handlePad);
-  pad.addEventListener("touchcancel", handlePad);
 
 })();
