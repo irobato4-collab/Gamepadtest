@@ -43,40 +43,41 @@
     }
     .dir.active::before { opacity:1; }
 
-    .up::before { width:60px; height:90px; transform:translate(-50%, -100%); }
-    .down::before { width:60px; height:90px; transform:translate(-50%, 0%); }
-    .left::before { width:90px; height:60px; transform:translate(-100%, -50%); }
-    .right::before { width:90px; height:60px; transform:translate(0%, -50%); }
+    .up::before { width:70px; height:100px; transform:translate(-50%, -100%); }
+    .down::before { width:70px; height:100px; transform:translate(-50%, 0%); }
+    .left::before { width:100px; height:70px; transform:translate(-100%, -50%); }
+    .right::before { width:100px; height:70px; transform:translate(0%, -50%); }
 
     #pad {
       position:absolute;
       bottom:40px;
       right:100px;
-      width:200px;
-      height:200px;
+      width:220px;
+      height:220px;
       touch-action:none;
     }
 
     .btn {
       position:absolute;
-      width:60px;
-      height:60px;
+      width:70px;
+      height:70px;
       border-radius:50%;
       background:rgba(255,255,255,0.2);
       border:2px solid white;
       text-align:center;
-      line-height:60px;
+      line-height:70px;
       color:white;
+      font-size:22px;
     }
 
     .btn.active {
-      background:rgba(255,255,255,0.6);
+      background:rgba(255,255,255,0.7);
     }
 
-    #btnA { left:130px; top:70px; }
-    #btnB { left:70px; top:130px; }
-    #btnX { left:70px; top:10px; }
-    #btnY { left:10px; top:70px; }
+    #btnA { left:150px; top:80px; }
+    #btnB { left:80px; top:150px; }
+    #btnX { left:80px; top:10px; }
+    #btnY { left:10px; top:80px; }
   `;
   document.head.appendChild(style);
 
@@ -99,7 +100,6 @@
   function handleDpad(e) {
     const rect = zone.getBoundingClientRect();
 
-    // 初期化
     gamepadState.up = false;
     gamepadState.down = false;
     gamepadState.left = false;
@@ -108,7 +108,6 @@
 
     for (let t of e.touches) {
 
-      // 👉 zone内の指だけ使う（超重要）
       if (
         t.clientX < rect.left || t.clientX > rect.right ||
         t.clientY < rect.top || t.clientY > rect.bottom
@@ -117,7 +116,7 @@
       const x = t.clientX - (rect.left + rect.width / 2);
       const y = t.clientY - (rect.top + rect.height / 2);
 
-      if (Math.abs(x) < 10 && Math.abs(y) < 10) continue;
+      if (Math.abs(x) < 15 && Math.abs(y) < 15) continue;
 
       if (Math.abs(x) > Math.abs(y)) {
         if (x > 0) {
@@ -154,26 +153,33 @@
     Y: document.getElementById("btnY")
   };
 
-  function handlePad(e) {
-    const rect = pad.getBoundingClientRect();
+  function expandRect(rect, margin) {
+    return {
+      left: rect.left - margin,
+      right: rect.right + margin,
+      top: rect.top - margin,
+      bottom: rect.bottom + margin
+    };
+  }
 
-    // 初期化
-    gamepadState.A = false;
-    gamepadState.B = false;
-    gamepadState.X = false;
-    gamepadState.Y = false;
-    Object.values(btnMap).forEach(b => b.classList.remove("active"));
+  function handlePad(e) {
+    const padRect = pad.getBoundingClientRect();
+
+    const nextState = {
+      A:false, B:false, X:false, Y:false
+    };
 
     for (let t of e.touches) {
 
-      // 👉 pad内だけ（これが最重要）
       if (
-        t.clientX < rect.left || t.clientX > rect.right ||
-        t.clientY < rect.top || t.clientY > rect.bottom
+        t.clientX < padRect.left || t.clientX > padRect.right ||
+        t.clientY < padRect.top || t.clientY > padRect.bottom
       ) continue;
 
       for (let key in btnMap) {
-        const b = btnMap[key].getBoundingClientRect();
+
+        const base = btnMap[key].getBoundingClientRect();
+        const b = expandRect(base, 20); // ← 当たり判定拡張
 
         if (
           t.clientX >= b.left &&
@@ -181,9 +187,19 @@
           t.clientY >= b.top &&
           t.clientY <= b.bottom
         ) {
-          gamepadState[key] = true;
-          btnMap[key].classList.add("active");
+          nextState[key] = true;
         }
+      }
+    }
+
+    // 反映
+    for (let key in btnMap) {
+      gamepadState[key] = nextState[key];
+
+      if (nextState[key]) {
+        btnMap[key].classList.add("active");
+      } else {
+        btnMap[key].classList.remove("active");
       }
     }
   }
