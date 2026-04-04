@@ -30,45 +30,40 @@
       touch-action:none;
     }
 
-    .dir { position:absolute; width:100%; height:100%; }
-    .up { clip-path: polygon(50% 50%, 0% 0%, 100% 0%); }
-    .down { clip-path: polygon(50% 50%, 0% 100%, 100% 100%); }
-    .left { clip-path: polygon(50% 50%, 0% 0%, 0% 100%); }
-    .right { clip-path: polygon(50% 50%, 100% 0%, 100% 100%); }
+    .dir {
+      position:absolute;
+      width:100%;
+      height:100%;
+    }
+
+    /* ⭐ バランス良い細長杭 */
+    .up {
+      clip-path: polygon(42% 50%, 58% 50%, 58% 0%, 42% 0%);
+    }
+
+    .down {
+      clip-path: polygon(42% 50%, 58% 50%, 58% 100%, 42% 100%);
+    }
+
+    .left {
+      clip-path: polygon(50% 42%, 0% 42%, 0% 58%, 50% 58%);
+    }
+
+    .right {
+      clip-path: polygon(50% 42%, 100% 42%, 100% 58%, 50% 58%);
+    }
 
     .dir::before {
       content:"";
       position:absolute;
-      left:50%;
-      top:50%;
+      inset:0;
       background:white;
-      opacity:0.5;
-    }
-    .dir.active::before { opacity:1; }
-
-    /* ⭐ 細長くした */
-    .up::before {
-      width:60px;
-      height:140px;
-      transform:translate(-50%, -100%);
+      opacity:0.4;
+      border-radius:12px;
     }
 
-    .down::before {
-      width:60px;
-      height:140px;
-      transform:translate(-50%, 0%);
-    }
-
-    .left::before {
-      width:140px;
-      height:60px;
-      transform:translate(-100%, -50%);
-    }
-
-    .right::before {
-      width:140px;
-      height:60px;
-      transform:translate(0%, -50%);
+    .dir.active::before {
+      opacity:1;
     }
 
     #pad {
@@ -123,8 +118,8 @@
   function handleDpad(e) {
     const rect = zone.getBoundingClientRect();
 
-    const DEAD = 11;   // ⭐ 精密寄り
-    const RANGE = 16;  // ⭐ 少し縮小
+    const DEAD = 11;
+    const RANGE = 16;
 
     gamepadState.up = false;
     gamepadState.down = false;
