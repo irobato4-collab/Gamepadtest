@@ -1,29 +1,25 @@
+
 (function () {
 
-  // ===== 状態 =====
   window.gamepadState = {
-    up:false, down:false, left:false, right:false,
-    A:false, B:false, X:false, Y:false
+    up:false, down:false, left:false, right:false
   };
 
-  // ===== HTML =====
   document.body.insertAdjacentHTML("beforeend", `
     <div id="zone">
-      <div class="dir up"></div>
-      <div class="dir down"></div>
-      <div class="dir left"></div>
-      <div class="dir right"></div>
-    </div>
+      <div class="hit up"></div>
+      <div class="hit down"></div>
+      <div class="hit left"></div>
+      <div class="hit right"></div>
 
-    <div id="pad">
-      <div id="btnA" class="btn">A</div>
-      <div id="btnB" class="btn">B</div>
-      <div id="btnX" class="btn">X</div>
-      <div id="btnY" class="btn">Y</div>
+      <!-- ⭐ 見た目（切られない） -->
+      <div class="stick up"></div>
+      <div class="stick down"></div>
+      <div class="stick left"></div>
+      <div class="stick right"></div>
     </div>
   `);
 
-  // ===== CSS =====
   const style = document.createElement("style");
   style.textContent = `
     #zone {
@@ -35,7 +31,8 @@
       touch-action:none;
     }
 
-    .dir {
+    /* ===== 当たり判定（三角） ===== */
+    .hit {
       position:absolute;
       width:100%;
       height:100%;
@@ -46,183 +43,94 @@
     .left { clip-path: polygon(50% 50%, 0% 0%, 0% 100%); }
     .right { clip-path: polygon(50% 50%, 100% 0%, 100% 100%); }
 
-    .dir::before {
-      content:"";
+    /* ===== 見た目（棒） ===== */
+    .stick {
       position:absolute;
       left:50%;
       top:50%;
       background:white;
       opacity:0.5;
+      pointer-events:none;
+      border-radius:12px;
     }
 
-    .dir.active::before {
+    .stick.active {
       opacity:1;
     }
 
-    /* ⭐ ここが今回の変更（外まで伸ばす） */
-    .up::before {
-      width:50px;
-      height:150px;
+    /* ⭐ ここは自由に伸びる */
+    .stick.up {
+      width:60px;
+      height:170px;
       transform:translate(-50%, -100%);
     }
 
-    .down::before {
-      width:50px;
-      height:150px;
+    .stick.down {
+      width:60px;
+      height:170px;
       transform:translate(-50%, 0%);
     }
 
-    .left::before {
-      width:150px;
-      height:50px;
+    .stick.left {
+      width:170px;
+      height:60px;
       transform:translate(-100%, -50%);
     }
 
-    .right::before {
-      width:150px;
-      height:50px;
+    .stick.right {
+      width:170px;
+      height:60px;
       transform:translate(0%, -50%);
     }
-
-    /* ===== ボタン ===== */
-    #pad {
-      position:absolute;
-      bottom:40px;
-      right:100px;
-      width:220px;
-      height:220px;
-      touch-action:none;
-    }
-
-    .btn {
-      position:absolute;
-      width:70px;
-      height:70px;
-      border-radius:50%;
-      background:rgba(255,255,255,0.2);
-      border:2px solid white;
-      text-align:center;
-      line-height:70px;
-      color:white;
-      font-size:22px;
-    }
-
-    .btn.active {
-      background:rgba(255,255,255,0.7);
-    }
-
-    #btnA { left:150px; top:80px; }
-    #btnB { left:80px; top:150px; }
-    #btnX { left:80px; top:10px; }
-    #btnY { left:10px; top:80px; }
   `;
   document.head.appendChild(style);
 
-  // ===== D-pad =====
   const zone = document.getElementById("zone");
 
-  const dirs = {
-    up: zone.querySelector(".up"),
-    down: zone.querySelector(".down"),
-    left: zone.querySelector(".left"),
-    right: zone.querySelector(".right")
+  const sticks = {
+    up: zone.querySelector(".stick.up"),
+    down: zone.querySelector(".stick.down"),
+    left: zone.querySelector(".stick.left"),
+    right: zone.querySelector(".stick.right")
   };
 
-  function handleDpad(e) {
+  function handle(e) {
     const rect = zone.getBoundingClientRect();
-
     const cx = rect.left + rect.width / 2;
     const cy = rect.top + rect.height / 2;
-
-    const DEAD = 12;
-    const RANGE = 40;
 
     gamepadState.up = false;
     gamepadState.down = false;
     gamepadState.left = false;
     gamepadState.right = false;
 
-    Object.values(dirs).forEach(d => d.classList.remove("active"));
+    Object.values(sticks).forEach(s => s.classList.remove("active"));
 
     for (let t of e.touches) {
-
-      if (
-        t.clientX < rect.left - RANGE ||
-        t.clientX > rect.right + RANGE ||
-        t.clientY < rect.top - RANGE ||
-        t.clientY > rect.bottom + RANGE
-      ) continue;
-
       const x = t.clientX - cx;
       const y = t.clientY - cy;
-
-      if (Math.abs(x) < DEAD && Math.abs(y) < DEAD) continue;
 
       if (Math.abs(x) > Math.abs(y)) {
         if (x > 0) {
           gamepadState.right = true;
-          dirs.right.classList.add("active");
+          sticks.right.classList.add("active");
         } else {
           gamepadState.left = true;
-          dirs.left.classList.add("active");
+          sticks.left.classList.add("active");
         }
       } else {
         if (y > 0) {
           gamepadState.down = true;
-          dirs.down.classList.add("active");
+          sticks.down.classList.add("active");
         } else {
           gamepadState.up = true;
-          dirs.up.classList.add("active");
+          sticks.up.classList.add("active");
         }
       }
     }
   }
 
-  zone.addEventListener("touchstart", handleDpad, { passive:false });
-  zone.addEventListener("touchmove", handleDpad, { passive:false });
-  zone.addEventListener("touchend", handleDpad);
-  zone.addEventListener("touchcancel", handleDpad);
-
-  // ===== ABXY =====
-  const pad = document.getElementById("pad");
-
-  const btnMap = {
-    A: document.getElementById("btnA"),
-    B: document.getElementById("btnB"),
-    X: document.getElementById("btnX"),
-    Y: document.getElementById("btnY")
-  };
-
-  function handlePad(e) {
-    const next = { A:false, B:false, X:false, Y:false };
-
-    for (let t of e.touches) {
-
-      for (let key in btnMap) {
-
-        const r = btnMap[key].getBoundingClientRect();
-        const margin = 12;
-
-        if (
-          t.clientX >= r.left - margin &&
-          t.clientX <= r.right + margin &&
-          t.clientY >= r.top - margin &&
-          t.clientY <= r.bottom + margin
-        ) {
-          next[key] = true;
-        }
-      }
-    }
-
-    for (let key in btnMap) {
-      gamepadState[key] = next[key];
-      btnMap[key].classList.toggle("active", next[key]);
-    }
-  }
-
-  pad.addEventListener("touchstart", handlePad, { passive:false });
-  pad.addEventListener("touchmove", handlePad, { passive:false });
-  pad.addEventListener("touchend", handlePad);
-  pad.addEventListener("touchcancel", handlePad);
-
+  zone.addEventListener("touchstart", handle, { passive:false });
+  zone.addEventListener("touchmove", handle, { passive:false });
+  zone.addEventListener("touchend", handle);
 })();
