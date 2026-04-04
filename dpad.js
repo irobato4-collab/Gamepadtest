@@ -95,7 +95,7 @@
   `;
   document.head.appendChild(style);
 
-  // ===== D-pad（見た目一致判定）=====
+  // ===== D-pad（1方向固定）=====
   const zone = document.getElementById("zone");
   const dirs = {
     up: zone.querySelector(".up"),
@@ -133,25 +133,23 @@
 
       if (Math.abs(x) < DEAD && Math.abs(y) < DEAD) continue;
 
-      // ⭐ 三角と同じ条件
-      if (y < 0 && Math.abs(x) < -y) {
-        gamepadState.up = true;
-        dirs.up.classList.add("active");
-      }
-
-      if (y > 0 && Math.abs(x) < y) {
-        gamepadState.down = true;
-        dirs.down.classList.add("active");
-      }
-
-      if (x < 0 && Math.abs(y) < -x) {
-        gamepadState.left = true;
-        dirs.left.classList.add("active");
-      }
-
-      if (x > 0 && Math.abs(y) < x) {
-        gamepadState.right = true;
-        dirs.right.classList.add("active");
+      // ⭐ 1方向だけ確定
+      if (Math.abs(x) > Math.abs(y)) {
+        if (x > 0) {
+          gamepadState.right = true;
+          dirs.right.classList.add("active");
+        } else {
+          gamepadState.left = true;
+          dirs.left.classList.add("active");
+        }
+      } else {
+        if (y > 0) {
+          gamepadState.down = true;
+          dirs.down.classList.add("active");
+        } else {
+          gamepadState.up = true;
+          dirs.up.classList.add("active");
+        }
       }
     }
   }
@@ -161,7 +159,7 @@
   zone.addEventListener("touchend", handleDpad);
   zone.addEventListener("touchcancel", handleDpad);
 
-  // ===== ABXY（押しやすく）=====
+  // ===== ABXY（同時押し安定版）=====
   const pad = document.getElementById("pad");
 
   const btnMap = {
@@ -171,15 +169,6 @@
     Y: document.getElementById("btnY")
   };
 
-  function expand(rect, m) {
-    return {
-      left: rect.left - m,
-      right: rect.right + m,
-      top: rect.top - m,
-      bottom: rect.bottom + m
-    };
-  }
-
   function handlePad(e) {
     const next = { A:false, B:false, X:false, Y:false };
 
@@ -187,13 +176,16 @@
 
       for (let key in btnMap) {
 
-        const r = expand(btnMap[key].getBoundingClientRect(), 18);
+        const r = btnMap[key].getBoundingClientRect();
+
+        // ⭐ 少しだけ広げる（重ならないレベル）
+        const margin = 12;
 
         if (
-          t.clientX >= r.left &&
-          t.clientX <= r.right &&
-          t.clientY >= r.top &&
-          t.clientY <= r.bottom
+          t.clientX >= r.left - margin &&
+          t.clientX <= r.right + margin &&
+          t.clientY >= r.top - margin &&
+          t.clientY <= r.bottom + margin
         ) {
           next[key] = true;
         }
