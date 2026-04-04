@@ -7,15 +7,17 @@
 
   document.body.insertAdjacentHTML("beforeend", `
     <div id="zone">
-      <div class="hit up"></div>
-      <div class="hit down"></div>
-      <div class="hit left"></div>
-      <div class="hit right"></div>
+      <!-- 判定 -->
+      <div class="hit hit-up"></div>
+      <div class="hit hit-down"></div>
+      <div class="hit hit-left"></div>
+      <div class="hit hit-right"></div>
 
-      <div class="stick up"></div>
-      <div class="stick down"></div>
-      <div class="stick left"></div>
-      <div class="stick right"></div>
+      <!-- 見た目 -->
+      <div class="stick stick-up"></div>
+      <div class="stick stick-down"></div>
+      <div class="stick stick-left"></div>
+      <div class="stick stick-right"></div>
     </div>
 
     <div id="pad">
@@ -28,7 +30,6 @@
 
   const style = document.createElement("style");
   style.textContent = `
-    /* ===== D-pad（そのまま再現） ===== */
     #zone {
       position:absolute;
       bottom:60px;
@@ -38,17 +39,19 @@
       touch-action:none;
     }
 
+    /* ===== 判定 ===== */
     .hit {
       position:absolute;
       width:100%;
       height:100%;
     }
 
-    .up { clip-path: polygon(50% 50%, 0% 0%, 100% 0%); }
-    .down { clip-path: polygon(50% 50%, 0% 100%, 100% 100%); }
-    .left { clip-path: polygon(50% 50%, 0% 0%, 0% 100%); }
-    .right { clip-path: polygon(50% 50%, 100% 0%, 100% 100%); }
+    .hit-up { clip-path: polygon(50% 50%, 0% 0%, 100% 0%); }
+    .hit-down { clip-path: polygon(50% 50%, 0% 100%, 100% 100%); }
+    .hit-left { clip-path: polygon(50% 50%, 0% 0%, 0% 100%); }
+    .hit-right { clip-path: polygon(50% 50%, 100% 0%, 100% 100%); }
 
+    /* ===== 見た目 ===== */
     .stick {
       position:absolute;
       left:50%;
@@ -63,26 +66,26 @@
       opacity:1;
     }
 
-    /* ⭐ 完全一致サイズ */
-    .stick.up {
+    /* ⭐ 正しいDpad形 */
+    .stick-up {
       width:55px;
       height:100px;
       transform:translate(-50%, -100%);
     }
 
-    .stick.down {
+    .stick-down {
       width:55px;
       height:100px;
       transform:translate(-50%, 0%);
     }
 
-    .stick.left {
+    .stick-left {
       width:100px;
       height:55px;
       transform:translate(-100%, -50%);
     }
 
-    .stick.right {
+    .stick-right {
       width:100px;
       height:55px;
       transform:translate(0%, -50%);
@@ -126,10 +129,10 @@
   const zone = document.getElementById("zone");
 
   const sticks = {
-    up: zone.querySelector(".stick.up"),
-    down: zone.querySelector(".stick.down"),
-    left: zone.querySelector(".stick.left"),
-    right: zone.querySelector(".stick.right")
+    up: zone.querySelector(".stick-up"),
+    down: zone.querySelector(".stick-down"),
+    left: zone.querySelector(".stick-left"),
+    right: zone.querySelector(".stick-right")
   };
 
   function handleDpad(e) {
@@ -186,7 +189,7 @@
   zone.addEventListener("touchend", handleDpad);
   zone.addEventListener("touchcancel", handleDpad);
 
-  // ===== ABXY =====
+  // ===== ABXY（そのまま） =====
   const pad = document.getElementById("pad");
 
   const btnMap = {
@@ -200,9 +203,7 @@
     const next = { A:false, B:false, X:false, Y:false };
 
     for (let t of e.touches) {
-
       for (let key in btnMap) {
-
         const r = btnMap[key].getBoundingClientRect();
         const margin = 12;
 
