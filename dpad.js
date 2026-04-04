@@ -55,13 +55,36 @@
       opacity:0.5;
     }
 
-    .dir.active::before { opacity:1; }
+    .dir.active::before {
+      opacity:1;
+    }
 
-    .up::before { width:60px; height:90px; transform:translate(-50%, -100%); }
-    .down::before { width:60px; height:90px; transform:translate(-50%, 0%); }
-    .left::before { width:90px; height:60px; transform:translate(-100%, -50%); }
-    .right::before { width:90px; height:60px; transform:translate(0%, -50%); }
+    /* ⭐ ここが今回の変更（外まで伸ばす） */
+    .up::before {
+      width:60px;
+      height:150px;
+      transform:translate(-50%, -100%);
+    }
 
+    .down::before {
+      width:60px;
+      height:150px;
+      transform:translate(-50%, 0%);
+    }
+
+    .left::before {
+      width:150px;
+      height:60px;
+      transform:translate(-100%, -50%);
+    }
+
+    .right::before {
+      width:150px;
+      height:60px;
+      transform:translate(0%, -50%);
+    }
+
+    /* ===== ボタン ===== */
     #pad {
       position:absolute;
       bottom:40px;
@@ -95,7 +118,7 @@
   `;
   document.head.appendChild(style);
 
-  // ===== D-pad（拡張＋安定）=====
+  // ===== D-pad =====
   const zone = document.getElementById("zone");
 
   const dirs = {
@@ -112,7 +135,7 @@
     const cy = rect.top + rect.height / 2;
 
     const DEAD = 12;
-    const RANGE = 40; // ⭐ 外側拡張
+    const RANGE = 40;
 
     gamepadState.up = false;
     gamepadState.down = false;
@@ -123,7 +146,6 @@
 
     for (let t of e.touches) {
 
-      // ⭐ 拡張エリア判定
       if (
         t.clientX < rect.left - RANGE ||
         t.clientX > rect.right + RANGE ||
@@ -136,7 +158,6 @@
 
       if (Math.abs(x) < DEAD && Math.abs(y) < DEAD) continue;
 
-      // ⭐ 1方向固定（バグ防止）
       if (Math.abs(x) > Math.abs(y)) {
         if (x > 0) {
           gamepadState.right = true;
@@ -162,7 +183,7 @@
   zone.addEventListener("touchend", handleDpad);
   zone.addEventListener("touchcancel", handleDpad);
 
-  // ===== ABXY（同時押し安定）=====
+  // ===== ABXY =====
   const pad = document.getElementById("pad");
 
   const btnMap = {
@@ -180,7 +201,7 @@
       for (let key in btnMap) {
 
         const r = btnMap[key].getBoundingClientRect();
-        const margin = 12; // ⭐ 押しやすく
+        const margin = 12;
 
         if (
           t.clientX >= r.left - margin &&
