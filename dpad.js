@@ -9,10 +9,10 @@
   // ===== HTML =====
   document.body.insertAdjacentHTML("beforeend", `
     <div id="zone">
-      <div class="dir up" data-key="up"></div>
-      <div class="dir down" data-key="down"></div>
-      <div class="dir left" data-key="left"></div>
-      <div class="dir right" data-key="right"></div>
+      <div class="dir up"></div>
+      <div class="dir down"></div>
+      <div class="dir left"></div>
+      <div class="dir right"></div>
     </div>
 
     <div id="pad">
@@ -23,7 +23,7 @@
     </div>
   `);
 
-  // ===== CSS（そのまま＋ボタン追加）=====
+  // ===== CSS =====
   const style = document.createElement("style");
   style.textContent = `
     #zone {
@@ -83,7 +83,6 @@
       transform:translate(0%, -50%);
     }
 
-    /* ===== ボタン ===== */
     #pad {
       position:absolute;
       bottom:40px;
@@ -117,8 +116,9 @@
   `;
   document.head.appendChild(style);
 
-  // ===== D-pad スライド対応 =====
+  // ===== D-pad（精密版）=====
   const zone = document.getElementById("zone");
+
   const dirs = {
     up: zone.querySelector(".up"),
     down: zone.querySelector(".down"),
@@ -129,12 +129,13 @@
   function handleDpad(e) {
     const rect = zone.getBoundingClientRect();
 
-    const DEAD = 10;
+    const DEAD = 12;
 
     gamepadState.up = false;
     gamepadState.down = false;
     gamepadState.left = false;
     gamepadState.right = false;
+
     Object.values(dirs).forEach(d => d.classList.remove("active"));
 
     for (let t of e.touches) {
@@ -151,21 +152,30 @@
 
       if (Math.abs(x) < DEAD && Math.abs(y) < DEAD) continue;
 
-      if (x > 0) {
+      const angle = Math.atan2(y, x);
+
+      // 右
+      if (angle > -Math.PI/4 && angle < Math.PI/4) {
         gamepadState.right = true;
         dirs.right.classList.add("active");
       }
-      if (x < 0) {
-        gamepadState.left = true;
-        dirs.left.classList.add("active");
-      }
-      if (y > 0) {
+
+      // 下
+      else if (angle >= Math.PI/4 && angle < 3*Math.PI/4) {
         gamepadState.down = true;
         dirs.down.classList.add("active");
       }
-      if (y < 0) {
+
+      // 上
+      else if (angle <= -Math.PI/4 && angle > -3*Math.PI/4) {
         gamepadState.up = true;
         dirs.up.classList.add("active");
+      }
+
+      // 左
+      else {
+        gamepadState.left = true;
+        dirs.left.classList.add("active");
       }
     }
   }
@@ -175,7 +185,7 @@
   zone.addEventListener("touchend", handleDpad);
   zone.addEventListener("touchcancel", handleDpad);
 
-  // ===== ABXY（スライド＋同時押し）=====
+  // ===== ABXY（同時押し＋スライド）=====
   const pad = document.getElementById("pad");
 
   const btnMap = {
