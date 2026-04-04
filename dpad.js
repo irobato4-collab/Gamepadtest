@@ -1,18 +1,10 @@
 (function () {
 
-  // ⭐ 状態
   window.gamepadState = {
-    up: false,
-    down: false,
-    left: false,
-    right: false,
-    A: false,
-    B: false,
-    X: false,
-    Y: false
+    up:false, down:false, left:false, right:false,
+    A:false, B:false, X:false, Y:false
   };
 
-  // ===== HTML =====
   document.body.insertAdjacentHTML("beforeend", `
     <div id="zone"></div>
 
@@ -24,7 +16,6 @@
     </div>
   `);
 
-  // ===== CSS =====
   const style = document.createElement("style");
   style.textContent = `
     #zone {
@@ -33,32 +24,20 @@
       left:60px;
       width:180px;
       height:180px;
-      touch-action:none; /* ←超重要 */
+      touch-action:none;
     }
 
-    .dir {
-      position:absolute;
-      width:100%;
-      height:100%;
-    }
-
+    .dir { position:absolute; width:100%; height:100%; }
     .up { clip-path: polygon(50% 50%, 0% 0%, 100% 0%); }
     .down { clip-path: polygon(50% 50%, 0% 100%, 100% 100%); }
     .left { clip-path: polygon(50% 50%, 0% 0%, 0% 100%); }
     .right { clip-path: polygon(50% 50%, 100% 0%, 100% 100%); }
 
     .dir::before {
-      content:"";
-      position:absolute;
-      left:50%;
-      top:50%;
-      background:white;
-      opacity:0.5;
+      content:""; position:absolute; left:50%; top:50%;
+      background:white; opacity:0.5;
     }
-
-    .dir.active::before {
-      opacity:1;
-    }
+    .dir.active::before { opacity:1; }
 
     .up::before { width:60px; height:90px; transform:translate(-50%, -100%); }
     .down::before { width:60px; height:90px; transform:translate(-50%, 0%); }
@@ -71,24 +50,20 @@
       right:100px;
       width:200px;
       height:200px;
+      touch-action:none;
     }
 
     .btn {
       position:absolute;
-      width:60px;
-      height:60px;
+      width:60px; height:60px;
       border-radius:50%;
       background:rgba(255,255,255,0.2);
       border:2px solid white;
       text-align:center;
       line-height:60px;
-      font-size:20px;
       color:white;
     }
-
-    .btn.active {
-      background:rgba(255,255,255,0.6);
-    }
+    .btn.active { background:rgba(255,255,255,0.6); }
 
     #btnA { left:130px; top:70px; }
     #btnB { left:70px; top:130px; }
@@ -97,7 +72,7 @@
   `;
   document.head.appendChild(style);
 
-  // ===== D-pad生成 =====
+  // ===== D-pad =====
   const zone = document.getElementById("zone");
   zone.innerHTML = `
     <div class="dir up"></div>
@@ -118,83 +93,107 @@
     gamepadState.down = false;
     gamepadState.left = false;
     gamepadState.right = false;
-
     Object.values(dirs).forEach(d => d.classList.remove("active"));
   }
 
-  function updateDirection(x, y) {
+  function handleDpadTouches(e) {
+    e.preventDefault();
     resetDir();
 
-    const absX = Math.abs(x);
-    const absY = Math.abs(y);
+    const rect = zone.getBoundingClientRect();
 
-    if (absX > absY) {
-      if (x > 0) {
-        gamepadState.right = true;
-        dirs.right.classList.add("active");
+    for (let t of e.touches) {
+      const x = t.clientX - (rect.left + rect.width/2);
+      const y = t.clientY - (rect.top + rect.height/2);
+
+      const absX = Math.abs(x);
+      const absY = Math.abs(y);
+
+      if (absX > absY) {
+        if (x > 0) {
+          gamepadState.right = true;
+          dirs.right.classList.add("active");
+        } else {
+          gamepadState.left = true;
+          dirs.left.classList.add("active");
+        }
       } else {
-        gamepadState.left = true;
-        dirs.left.classList.add("active");
-      }
-    } else {
-      if (y > 0) {
-        gamepadState.down = true;
-        dirs.down.classList.add("active");
-      } else {
-        gamepadState.up = true;
-        dirs.up.classList.add("active");
+        if (y > 0) {
+          gamepadState.down = true;
+          dirs.down.classList.add("active");
+        } else {
+          gamepadState.up = true;
+          dirs.up.classList.add("active");
+        }
       }
     }
   }
 
-  let rect;
-
-  function handleTouch(e) {
-    e.preventDefault();
-
-    const touch = e.touches[0];
-    const x = touch.clientX - (rect.left + rect.width / 2);
-    const y = touch.clientY - (rect.top + rect.height / 2);
-
-    updateDirection(x, y);
-  }
-
-  zone.addEventListener("touchstart", e => {
-    rect = zone.getBoundingClientRect();
-    handleTouch(e);
-  }, { passive: false });
-
-  zone.addEventListener("touchmove", handleTouch, { passive: false });
-
+  zone.addEventListener("touchstart", handleDpadTouches, { passive:false });
+  zone.addEventListener("touchmove", handleDpadTouches, { passive:false });
   zone.addEventListener("touchend", resetDir);
   zone.addEventListener("touchcancel", resetDir);
 
   // ===== ボタン =====
-  function setupButton(id, key) {
-    const btn = document.getElementById(id);
+  const pad = document.getElementById("pad");
 
-    const press = () => {
-      gamepadState[key] = true;
-      btn.classList.add("active");
-    };
+  const btnMap = {
+    A: document.getElementById("btnA"),
+    B: document.getElementById("btnB"),
+    X: document.getElementById("btnX"),
+    Y: document.getElementById("btnY")
+  };
 
-    const release = () => {
-      gamepadState[key] = false;
-      btn.classList.remove("active");
-    };
-
-    btn.addEventListener("touchstart", press);
-    btn.addEventListener("touchend", release);
-    btn.addEventListener("touchcancel", release);
-
-    btn.addEventListener("mousedown", press);
-    btn.addEventListener("mouseup", release);
-    btn.addEventListener("mouseleave", release);
+  function resetButtons() {
+    gamepadState.A = false;
+    gamepadState.B = false;
+    gamepadState.X = false;
+    gamepadState.Y = false;
+    Object.values(btnMap).forEach(b => b.classList.remove("active"));
   }
 
-  setupButton("btnA", "A");
-  setupButton("btnB", "B");
-  setupButton("btnX", "X");
-  setupButton("btnY", "Y");
+  function handlePadTouches(e) {
+    e.preventDefault();
+    resetButtons();
+
+    const rect = pad.getBoundingClientRect();
+
+    for (let t of e.touches) {
+      const x = t.clientX - rect.left;
+      const y = t.clientY - rect.top;
+
+      const cx = rect.width / 2;
+      const cy = rect.height / 2;
+
+      const dx = x - cx;
+      const dy = y - cy;
+
+      const absX = Math.abs(dx);
+      const absY = Math.abs(dy);
+
+      if (absX > absY) {
+        if (dx > 0) {
+          gamepadState.A = true;
+          btnMap.A.classList.add("active");
+        } else {
+          gamepadState.Y = true;
+          btnMap.Y.classList.add("active");
+        }
+      } else {
+        if (dy > 0) {
+          gamepadState.B = true;
+          btnMap.B.classList.add("active");
+        } else {
+          gamepadState.X = true;
+          btnMap.X.classList.add("active");
+        }
+      }
+    }
+  }
+
+  pad.addEventListener("touchstart", handlePadTouches, { passive:false });
+  pad.addEventListener("touchmove", handlePadTouches, { passive:false });
+  pad.addEventListener("touchend", resetButtons);
+  pad.addEventListener("touchcancel", resetButtons);
 
 })();
