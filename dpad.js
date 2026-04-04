@@ -55,33 +55,12 @@
       opacity:0.5;
     }
 
-    .dir.active::before {
-      opacity:1;
-    }
+    .dir.active::before { opacity:1; }
 
-    .up::before {
-      width:60px;
-      height:90px;
-      transform:translate(-50%, -100%);
-    }
-
-    .down::before {
-      width:60px;
-      height:90px;
-      transform:translate(-50%, 0%);
-    }
-
-    .left::before {
-      width:90px;
-      height:60px;
-      transform:translate(-100%, -50%);
-    }
-
-    .right::before {
-      width:90px;
-      height:60px;
-      transform:translate(0%, -50%);
-    }
+    .up::before { width:60px; height:90px; transform:translate(-50%, -100%); }
+    .down::before { width:60px; height:90px; transform:translate(-50%, 0%); }
+    .left::before { width:90px; height:60px; transform:translate(-100%, -50%); }
+    .right::before { width:90px; height:60px; transform:translate(0%, -50%); }
 
     #pad {
       position:absolute;
@@ -116,9 +95,8 @@
   `;
   document.head.appendChild(style);
 
-  // ===== D-pad（精密版）=====
+  // ===== D-pad（見た目一致判定）=====
   const zone = document.getElementById("zone");
-
   const dirs = {
     up: zone.querySelector(".up"),
     down: zone.querySelector(".down"),
@@ -128,6 +106,9 @@
 
   function handleDpad(e) {
     const rect = zone.getBoundingClientRect();
+
+    const cx = rect.left + rect.width / 2;
+    const cy = rect.top + rect.height / 2;
 
     const DEAD = 12;
 
@@ -147,35 +128,30 @@
         t.clientY > rect.bottom
       ) continue;
 
-      const x = t.clientX - (rect.left + rect.width / 2);
-      const y = t.clientY - (rect.top + rect.height / 2);
+      const x = t.clientX - cx;
+      const y = t.clientY - cy;
 
       if (Math.abs(x) < DEAD && Math.abs(y) < DEAD) continue;
 
-      const angle = Math.atan2(y, x);
-
-      // 右
-      if (angle > -Math.PI/4 && angle < Math.PI/4) {
-        gamepadState.right = true;
-        dirs.right.classList.add("active");
-      }
-
-      // 下
-      else if (angle >= Math.PI/4 && angle < 3*Math.PI/4) {
-        gamepadState.down = true;
-        dirs.down.classList.add("active");
-      }
-
-      // 上
-      else if (angle <= -Math.PI/4 && angle > -3*Math.PI/4) {
+      // ⭐ 三角と同じ条件
+      if (y < 0 && Math.abs(x) < -y) {
         gamepadState.up = true;
         dirs.up.classList.add("active");
       }
 
-      // 左
-      else {
+      if (y > 0 && Math.abs(x) < y) {
+        gamepadState.down = true;
+        dirs.down.classList.add("active");
+      }
+
+      if (x < 0 && Math.abs(y) < -x) {
         gamepadState.left = true;
         dirs.left.classList.add("active");
+      }
+
+      if (x > 0 && Math.abs(y) < x) {
+        gamepadState.right = true;
+        dirs.right.classList.add("active");
       }
     }
   }
@@ -185,7 +161,7 @@
   zone.addEventListener("touchend", handleDpad);
   zone.addEventListener("touchcancel", handleDpad);
 
-  // ===== ABXY（同時押し＋スライド）=====
+  // ===== ABXY（押しやすく）=====
   const pad = document.getElementById("pad");
 
   const btnMap = {
@@ -195,28 +171,29 @@
     Y: document.getElementById("btnY")
   };
 
-  function handlePad(e) {
-    const rect = pad.getBoundingClientRect();
+  function expand(rect, m) {
+    return {
+      left: rect.left - m,
+      right: rect.right + m,
+      top: rect.top - m,
+      bottom: rect.bottom + m
+    };
+  }
 
+  function handlePad(e) {
     const next = { A:false, B:false, X:false, Y:false };
 
     for (let t of e.touches) {
 
-      if (
-        t.clientX < rect.left ||
-        t.clientX > rect.right ||
-        t.clientY < rect.top ||
-        t.clientY > rect.bottom
-      ) continue;
-
       for (let key in btnMap) {
-        const b = btnMap[key].getBoundingClientRect();
+
+        const r = expand(btnMap[key].getBoundingClientRect(), 18);
 
         if (
-          t.clientX >= b.left &&
-          t.clientX <= b.right &&
-          t.clientY >= b.top &&
-          t.clientY <= b.bottom
+          t.clientX >= r.left &&
+          t.clientX <= r.right &&
+          t.clientY >= r.top &&
+          t.clientY <= r.bottom
         ) {
           next[key] = true;
         }
@@ -225,9 +202,7 @@
 
     for (let key in btnMap) {
       gamepadState[key] = next[key];
-
-      if (next[key]) btnMap[key].classList.add("active");
-      else btnMap[key].classList.remove("active");
+      btnMap[key].classList.toggle("active", next[key]);
     }
   }
 
