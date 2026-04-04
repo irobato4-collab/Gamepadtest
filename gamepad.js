@@ -1,10 +1,7 @@
 (function () {
 
-  // ⭐ 切り替え（HTML側からも変更できる）
-  // "nipple" or "dpad"
   const PAD_TYPE = window.GAMEPAD_TYPE || "dpad";
 
-  // ⭐ 外部から使える状態
   window.gamepadState = {
     up: false,
     down: false,
@@ -16,7 +13,6 @@
     Y: false
   };
 
-  // HTML生成（そのまま）
   document.body.insertAdjacentHTML("beforeend", `
     <div id="zone" style="
       position:absolute; bottom:60px; left:60px;
@@ -34,7 +30,6 @@
     </div>
   `);
 
-  // CSS（そのまま）
   const style = document.createElement("style");
   style.textContent = `
     .btn {
@@ -62,9 +57,6 @@
   `;
   document.head.appendChild(style);
 
-  // =========================
-  // 🎮 入力リセット関数
-  // =========================
   function resetDir() {
     window.gamepadState.up = false;
     window.gamepadState.down = false;
@@ -73,9 +65,9 @@
   }
 
   // =========================
-  // 🎮 nipplejs モード
+  // 🎮 nipplejs
   // =========================
-  function initNipple() {
+  function loadNipple() {
     const script = document.createElement("script");
     script.src = "https://cdn.jsdelivr.net/npm/nipplejs@0.10.1/dist/nipplejs.min.js";
 
@@ -90,10 +82,10 @@
       joystick.on('move', (evt, data) => {
         if (!data.vector) return;
 
+        resetDir();
+
         const x = data.vector.x;
         const y = data.vector.y;
-
-        resetDir();
 
         if (y > 0.5) window.gamepadState.up = true;
         if (y < -0.5) window.gamepadState.down = true;
@@ -108,44 +100,41 @@
   }
 
   // =========================
-  // 🎮 D-pad（virtual-gamepad-lib）
+  // 🎮 D-pad（CDN script版）
   // =========================
-  async function initDpad() {
+  function loadDpad() {
+    const script = document.createElement("script");
+    script.src = "https://cdn.jsdelivr.net/npm/virtual-gamepad-lib/dist/virtual-gamepad-lib.umd.js";
 
-    const { GamepadEmulator } = await import('https://cdn.jsdelivr.net/npm/virtual-gamepad-lib/+esm');
+    script.onload = () => {
+      const zone = document.getElementById("zone");
 
-    const zone = document.getElementById('zone');
+      const pad = new window.VirtualGamepadLib.GamepadEmulator({
+        container: zone,
+        type: "dpad"
+      });
 
-    // 見た目をD-pad用に少し調整（中身だけ置く）
-    zone.style.width = "120px";
-    zone.style.height = "120px";
+      pad.on("change", (state) => {
+        window.gamepadState.up = !!state.up;
+        window.gamepadState.down = !!state.down;
+        window.gamepadState.left = !!state.left;
+        window.gamepadState.right = !!state.right;
+      });
+    };
 
-    const pad = new GamepadEmulator({
-      container: zone,
-      type: 'dpad'
-    });
-
-    pad.on('change', (state) => {
-      // state: {up,down,left,right}
-      window.gamepadState.up = !!state.up;
-      window.gamepadState.down = !!state.down;
-      window.gamepadState.left = !!state.left;
-      window.gamepadState.right = !!state.right;
-    });
+    document.head.appendChild(script);
   }
 
   // =========================
-  // 🎮 モード分岐
+  // 🎮 切り替え
   // =========================
   if (PAD_TYPE === "dpad") {
-    initDpad();
+    loadDpad();
   } else {
-    initNipple();
+    loadNipple();
   }
 
-  // =========================
-  // 🔘 ボタン（そのまま）
-  // =========================
+  // ボタン
   function setupButton(id, key) {
     const btn = document.getElementById(id);
 
