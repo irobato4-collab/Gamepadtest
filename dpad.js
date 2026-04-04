@@ -46,28 +46,28 @@
     }
     .dir.active::before { opacity:1; }
 
-    /* ⭐ 外側に長くした */
+    /* ⭐ 細長くした */
     .up::before {
-      width:80px;
-      height:130px;
+      width:60px;
+      height:140px;
       transform:translate(-50%, -100%);
     }
 
     .down::before {
-      width:80px;
-      height:130px;
+      width:60px;
+      height:140px;
       transform:translate(-50%, 0%);
     }
 
     .left::before {
-      width:130px;
-      height:80px;
+      width:140px;
+      height:60px;
       transform:translate(-100%, -50%);
     }
 
     .right::before {
-      width:130px;
-      height:80px;
+      width:140px;
+      height:60px;
       transform:translate(0%, -50%);
     }
 
@@ -123,8 +123,8 @@
   function handleDpad(e) {
     const rect = zone.getBoundingClientRect();
 
-    const DEAD = 12;
-    const RANGE = 20; // ⭐ 少し広げた
+    const DEAD = 11;   // ⭐ 精密寄り
+    const RANGE = 16;  // ⭐ 少し縮小
 
     gamepadState.up = false;
     gamepadState.down = false;
