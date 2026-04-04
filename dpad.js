@@ -1,21 +1,17 @@
 (function () {
 
-  // ===== 状態 =====
   window.gamepadState = {
     up:false, down:false, left:false, right:false,
     A:false, B:false, X:false, Y:false
   };
 
-  // ===== HTML =====
   document.body.insertAdjacentHTML("beforeend", `
     <div id="zone">
-      <!-- 判定 -->
       <div class="hit up"></div>
       <div class="hit down"></div>
       <div class="hit left"></div>
       <div class="hit right"></div>
 
-      <!-- 見た目 -->
       <div class="stick up"></div>
       <div class="stick down"></div>
       <div class="stick left"></div>
@@ -30,19 +26,18 @@
     </div>
   `);
 
-  // ===== CSS =====
   const style = document.createElement("style");
   style.textContent = `
+    /* ⭐ D-pad拡大 */
     #zone {
       position:absolute;
-      bottom:60px;
-      left:60px;
-      width:180px;
-      height:180px;
+      bottom:50px;
+      left:50px;
+      width:230px;   /* ← ここ変更 */
+      height:230px;  /* ← ここ変更 */
       touch-action:none;
     }
 
-    /* ===== 判定（三角） ===== */
     .hit {
       position:absolute;
       width:100%;
@@ -54,7 +49,6 @@
     .left { clip-path: polygon(50% 50%, 0% 0%, 0% 100%); }
     .right { clip-path: polygon(50% 50%, 100% 0%, 100% 100%); }
 
-    /* ===== 見た目（自由に伸びる棒） ===== */
     .stick {
       position:absolute;
       left:50%;
@@ -62,36 +56,35 @@
       background:white;
       opacity:0.4;
       pointer-events:none;
-      border-radius:12px;
-      transition:opacity 0.05s;
+      border-radius:14px;
     }
 
     .stick.active {
       opacity:1;
     }
 
-    /* ⭐ 長さここで自由に変えれる */
+    /* ⭐ サイズも少し大きくする */
     .stick.up {
-      width:60px;
-      height:170px;
+      width:70px;
+      height:190px;
       transform:translate(-50%, -100%);
     }
 
     .stick.down {
-      width:60px;
-      height:170px;
+      width:70px;
+      height:190px;
       transform:translate(-50%, 0%);
     }
 
     .stick.left {
-      width:170px;
-      height:60px;
+      width:190px;
+      height:70px;
       transform:translate(-100%, -50%);
     }
 
     .stick.right {
-      width:170px;
-      height:60px;
+      width:190px;
+      height:70px;
       transform:translate(0%, -50%);
     }
 
@@ -116,7 +109,6 @@
       line-height:70px;
       color:white;
       font-size:22px;
-      transition:background 0.05s;
     }
 
     .btn.active {
@@ -145,8 +137,8 @@
     const cx = rect.left + rect.width / 2;
     const cy = rect.top + rect.height / 2;
 
-    const DEAD = 12;
-    const RANGE = 40;
+    const DEAD = 14;
+    const RANGE = 50;
 
     gamepadState.up = false;
     gamepadState.down = false;
@@ -169,7 +161,6 @@
 
       if (Math.abs(x) < DEAD && Math.abs(y) < DEAD) continue;
 
-      // ⭐ 1方向固定（バグ防止）
       if (Math.abs(x) > Math.abs(y)) {
         if (x > 0) {
           gamepadState.right = true;
@@ -195,7 +186,7 @@
   zone.addEventListener("touchend", handleDpad);
   zone.addEventListener("touchcancel", handleDpad);
 
-  // ===== ABXY処理 =====
+  // ===== ABXY =====
   const pad = document.getElementById("pad");
 
   const btnMap = {
