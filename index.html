@@ -67,7 +67,7 @@ body {
 
 
 <script>
-  window.GAMEPAD_TYPE = "dpad";
+  
 const game = document.getElementById("game");
 const container = document.getElementById("container");
 const player = document.getElementById("player");
@@ -160,7 +160,19 @@ function gameLoop() {
   requestAnimationFrame(gameLoop);
 }
 
-gameLoop();
+  window.GAMEPAD_TYPE = "dpad";
+
+// gameLoop();
+  function waitGamepadAndStart() {
+  if (window.gamepadState) {
+    gameLoop();
+  } else {
+    requestAnimationFrame(waitGamepadAndStart);
+  }
+}
+
+waitGamepadAndStart();
+  
 </script>
 
   <script src="gamepad.js"></script>
