@@ -2,164 +2,123 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<title>敵ありゲーム</title>
+<title>Gamepad Debug UI</title>
 
 <style>
 body {
-  margin: 0;
-  background: black;
-  overflow: hidden;
+  margin:0;
+  background:#111;
+  font-family:monospace;
+  color:white;
 }
 
-#container {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
+/* ===== コンテナ ===== */
+#debugContainer {
+  position:absolute;
+  top:20px;
+  left:20px;
+  display:flex;
+  flex-direction:column;
+  gap:10px;
 }
 
-#game {
-  position: relative;
-  width: 800px;
-  height: 450px;
-  background: #222;
-  overflow: hidden;
+/* ===== 行 ===== */
+.row {
+  display:flex;
+  gap:10px;
 }
 
-/* プレイヤー */
-#player {
-  position: absolute;
-  width: 50px;
-  height: 50px;
-  background: cyan;
+/* ===== ボタン表示 ===== */
+.key {
+  width:60px;
+  height:60px;
+  border-radius:12px;
+  background:#333;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:18px;
+  border:2px solid #555;
+  transition:0.1s;
 }
 
-/* 敵 */
-.enemy {
-  position: absolute;
-  width: 50px;
-  height: 50px;
-  background: red;
+/* 押されてる状態 */
+.key.active {
+  background:#00ccff;
+  color:black;
+  border-color:#00ccff;
+  transform:scale(1.1);
 }
 
-/* 地面 */
-#ground {
-  position: absolute;
-  bottom: 0;
-  width: 100%;
-  height: 80px;
-  background: #444;
+/* 方向キー配置 */
+#dpad {
+  display:grid;
+  grid-template-columns:60px 60px 60px;
+  grid-template-rows:60px 60px 60px;
+  gap:5px;
+}
+
+.empty {
+  visibility:hidden;
 }
 </style>
 </head>
 
 <body>
 
-<div id="container">
-  <div id="game">
-    <div id="player"></div>
-    <div class="enemy" id="enemy"></div>
-    <div id="ground"></div>
+<div id="debugContainer">
+
+  <!-- D-pad -->
+  <div id="dpad">
+    <div class="empty"></div>
+    <div class="key" id="up">↑</div>
+    <div class="empty"></div>
+
+    <div class="key" id="left">←</div>
+    <div class="empty"></div>
+    <div class="key" id="right">→</div>
+
+    <div class="empty"></div>
+    <div class="key" id="down">↓</div>
+    <div class="empty"></div>
   </div>
+
+  <!-- ボタン -->
+  <div class="row">
+    <div class="key" id="A">A</div>
+    <div class="key" id="B">B</div>
+    <div class="key" id="X">X</div>
+    <div class="key" id="Y">Y</div>
+  </div>
+
 </div>
 
-<!-- ⭐ ローカル読み込み -->
-<script src="dpad.js"></script>
+<!-- ⭐ ここであなたのgamepad.jsを読み込む -->
+<script src="gamepad.js"></script>
 
 <script>
-const game = document.getElementById("game");
-const container = document.getElementById("container");
-const player = document.getElementById("player");
-const enemy = document.getElementById("enemy");
-
-const GAME_WIDTH = 800;
-const GAME_HEIGHT = 450;
-
-// プレイヤー
-let x = 100;
-let y = 100;
-let velocityY = 0;
-
-// 敵
-let enemyX = 500;
-let enemyY = GAME_HEIGHT - 80 - 50;
-let enemyDir = -2;
-
-const gravity = 0.5;
-const jumpPower = -10;
-const groundY = GAME_HEIGHT - 80 - 50;
-
-// リサイズ
-function resize() {
-  const scale = Math.min(
-    window.innerWidth / GAME_WIDTH,
-    window.innerHeight / GAME_HEIGHT
-  );
-  container.style.transform =
-    `translate(-50%, -50%) scale(${scale})`;
-}
-window.addEventListener("resize", resize);
-resize();
-
-// 当たり判定
-function isColliding(aX, aY, bX, bY) {
-  return (
-    aX < bX + 50 &&
-    aX + 50 > bX &&
-    aY < bY + 50 &&
-    aY + 50 > bY
-  );
-}
-
-function resetPlayer() {
-  x = 100;
-  y = 100;
-  velocityY = 0;
-}
-
-function gameLoop() {
-
+function updateUI() {
   const g = window.gamepadState;
-
-  // プレイヤー移動
-  if (g.left) x -= 4;
-  if (g.right) x += 4;
-
-  if (g.A && y >= groundY) {
-    velocityY = jumpPower;
+  if (!g) {
+    requestAnimationFrame(updateUI);
+    return;
   }
 
-  velocityY += gravity;
-  y += velocityY;
+  for (let key in g) {
+    const el = document.getElementById(key);
+    if (!el) continue;
 
-  if (y > groundY) {
-    y = groundY;
-    velocityY = 0;
+    if (g[key]) {
+      el.classList.add("active");
+    } else {
+      el.classList.remove("active");
+    }
   }
 
-  // ⭐ 敵の動き（左右に往復）
-  enemyX += enemyDir;
-
-  if (enemyX < 200 || enemyX > 700) {
-    enemyDir *= -1;
-  }
-
-  // ⭐ 当たったらリセット
-  if (isColliding(x, y, enemyX, enemyY)) {
-    resetPlayer();
-  }
-
-  // 描画
-  player.style.left = x + "px";
-  player.style.top = y + "px";
-
-  enemy.style.left = enemyX + "px";
-  enemy.style.top = enemyY + "px";
-
-  requestAnimationFrame(gameLoop);
+  requestAnimationFrame(updateUI);
 }
 
-gameLoop();
+updateUI();
 </script>
 
 </body>
