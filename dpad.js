@@ -28,12 +28,12 @@
 
   const style = document.createElement("style");
   style.textContent = `
-    /* ===== D-pad ===== */
+    /* ===== D-pad（そのまま再現） ===== */
     #zone {
       position:absolute;
-      bottom:55px;
-      left:55px;
-      width:200px;   /* ⭐ ちょうどいいサイズ */
+      bottom:60px;
+      left:60px;
+      width:200px;
       height:200px;
       touch-action:none;
     }
@@ -56,35 +56,35 @@
       background:white;
       opacity:0.4;
       pointer-events:none;
-      border-radius:12px;
+      border-radius:10px;
     }
 
     .stick.active {
       opacity:1;
     }
 
-    /* ⭐ バランス調整 */
+    /* ⭐ 完全一致サイズ */
     .stick.up {
-      width:65px;
-      height:165px;
+      width:55px;
+      height:100px;
       transform:translate(-50%, -100%);
     }
 
     .stick.down {
-      width:65px;
-      height:165px;
+      width:55px;
+      height:100px;
       transform:translate(-50%, 0%);
     }
 
     .stick.left {
-      width:165px;
-      height:65px;
+      width:100px;
+      height:55px;
       transform:translate(-100%, -50%);
     }
 
     .stick.right {
-      width:165px;
-      height:65px;
+      width:100px;
+      height:55px;
       transform:translate(0%, -50%);
     }
 
@@ -122,7 +122,7 @@
   `;
   document.head.appendChild(style);
 
-  // ===== D-pad処理 =====
+  // ===== D-pad =====
   const zone = document.getElementById("zone");
 
   const sticks = {
@@ -137,8 +137,8 @@
     const cx = rect.left + rect.width / 2;
     const cy = rect.top + rect.height / 2;
 
-    const DEAD = 12;
-    const RANGE = 40;
+    const DEAD = 10;
+    const RANGE = 30;
 
     gamepadState.up = false;
     gamepadState.down = false;
