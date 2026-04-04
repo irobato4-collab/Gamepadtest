@@ -46,10 +46,30 @@
     }
     .dir.active::before { opacity:1; }
 
-    .up::before { width:70px; height:100px; transform:translate(-50%, -100%); }
-    .down::before { width:70px; height:100px; transform:translate(-50%, 0%); }
-    .left::before { width:100px; height:70px; transform:translate(-100%, -50%); }
-    .right::before { width:100px; height:70px; transform:translate(0%, -50%); }
+    /* ⭐ 外側に長くした */
+    .up::before {
+      width:80px;
+      height:130px;
+      transform:translate(-50%, -100%);
+    }
+
+    .down::before {
+      width:80px;
+      height:130px;
+      transform:translate(-50%, 0%);
+    }
+
+    .left::before {
+      width:130px;
+      height:80px;
+      transform:translate(-100%, -50%);
+    }
+
+    .right::before {
+      width:130px;
+      height:80px;
+      transform:translate(0%, -50%);
+    }
 
     #pad {
       position:absolute;
@@ -103,8 +123,8 @@
   function handleDpad(e) {
     const rect = zone.getBoundingClientRect();
 
-    const DEAD = 12;   // ⭐ 調整済み
-    const RANGE = 15;  // ⭐ 調整済み
+    const DEAD = 12;
+    const RANGE = 20; // ⭐ 少し広げた
 
     gamepadState.up = false;
     gamepadState.down = false;
@@ -184,7 +204,7 @@
       for (let key in btnMap) {
 
         const base = btnMap[key].getBoundingClientRect();
-        const b = expandRect(base, 20); // ⭐ 押しやすい
+        const b = expandRect(base, 20);
 
         if (
           t.clientX >= b.left &&
