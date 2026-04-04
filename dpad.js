@@ -1,25 +1,36 @@
-
 (function () {
 
+  // ===== 状態 =====
   window.gamepadState = {
-    up:false, down:false, left:false, right:false
+    up:false, down:false, left:false, right:false,
+    A:false, B:false, X:false, Y:false
   };
 
+  // ===== HTML =====
   document.body.insertAdjacentHTML("beforeend", `
     <div id="zone">
+      <!-- 判定 -->
       <div class="hit up"></div>
       <div class="hit down"></div>
       <div class="hit left"></div>
       <div class="hit right"></div>
 
-      <!-- ⭐ 見た目（切られない） -->
+      <!-- 見た目 -->
       <div class="stick up"></div>
       <div class="stick down"></div>
       <div class="stick left"></div>
       <div class="stick right"></div>
     </div>
+
+    <div id="pad">
+      <div id="btnA" class="btn">A</div>
+      <div id="btnB" class="btn">B</div>
+      <div id="btnX" class="btn">X</div>
+      <div id="btnY" class="btn">Y</div>
+    </div>
   `);
 
+  // ===== CSS =====
   const style = document.createElement("style");
   style.textContent = `
     #zone {
@@ -31,7 +42,7 @@
       touch-action:none;
     }
 
-    /* ===== 当たり判定（三角） ===== */
+    /* ===== 判定（三角） ===== */
     .hit {
       position:absolute;
       width:100%;
@@ -43,22 +54,23 @@
     .left { clip-path: polygon(50% 50%, 0% 0%, 0% 100%); }
     .right { clip-path: polygon(50% 50%, 100% 0%, 100% 100%); }
 
-    /* ===== 見た目（棒） ===== */
+    /* ===== 見た目（自由に伸びる棒） ===== */
     .stick {
       position:absolute;
       left:50%;
       top:50%;
       background:white;
-      opacity:0.5;
+      opacity:0.4;
       pointer-events:none;
       border-radius:12px;
+      transition:opacity 0.05s;
     }
 
     .stick.active {
       opacity:1;
     }
 
-    /* ⭐ ここは自由に伸びる */
+    /* ⭐ 長さここで自由に変えれる */
     .stick.up {
       width:60px;
       height:170px;
@@ -82,9 +94,43 @@
       height:60px;
       transform:translate(0%, -50%);
     }
+
+    /* ===== ABXY ===== */
+    #pad {
+      position:absolute;
+      bottom:40px;
+      right:100px;
+      width:220px;
+      height:220px;
+      touch-action:none;
+    }
+
+    .btn {
+      position:absolute;
+      width:70px;
+      height:70px;
+      border-radius:50%;
+      background:rgba(255,255,255,0.2);
+      border:2px solid white;
+      text-align:center;
+      line-height:70px;
+      color:white;
+      font-size:22px;
+      transition:background 0.05s;
+    }
+
+    .btn.active {
+      background:rgba(255,255,255,0.7);
+    }
+
+    #btnA { left:150px; top:80px; }
+    #btnB { left:80px; top:150px; }
+    #btnX { left:80px; top:10px; }
+    #btnY { left:10px; top:80px; }
   `;
   document.head.appendChild(style);
 
+  // ===== D-pad処理 =====
   const zone = document.getElementById("zone");
 
   const sticks = {
@@ -94,10 +140,13 @@
     right: zone.querySelector(".stick.right")
   };
 
-  function handle(e) {
+  function handleDpad(e) {
     const rect = zone.getBoundingClientRect();
     const cx = rect.left + rect.width / 2;
     const cy = rect.top + rect.height / 2;
+
+    const DEAD = 12;
+    const RANGE = 40;
 
     gamepadState.up = false;
     gamepadState.down = false;
@@ -107,9 +156,20 @@
     Object.values(sticks).forEach(s => s.classList.remove("active"));
 
     for (let t of e.touches) {
+
+      if (
+        t.clientX < rect.left - RANGE ||
+        t.clientX > rect.right + RANGE ||
+        t.clientY < rect.top - RANGE ||
+        t.clientY > rect.bottom + RANGE
+      ) continue;
+
       const x = t.clientX - cx;
       const y = t.clientY - cy;
 
+      if (Math.abs(x) < DEAD && Math.abs(y) < DEAD) continue;
+
+      // ⭐ 1方向固定（バグ防止）
       if (Math.abs(x) > Math.abs(y)) {
         if (x > 0) {
           gamepadState.right = true;
@@ -130,7 +190,51 @@
     }
   }
 
-  zone.addEventListener("touchstart", handle, { passive:false });
-  zone.addEventListener("touchmove", handle, { passive:false });
-  zone.addEventListener("touchend", handle);
+  zone.addEventListener("touchstart", handleDpad, { passive:false });
+  zone.addEventListener("touchmove", handleDpad, { passive:false });
+  zone.addEventListener("touchend", handleDpad);
+  zone.addEventListener("touchcancel", handleDpad);
+
+  // ===== ABXY処理 =====
+  const pad = document.getElementById("pad");
+
+  const btnMap = {
+    A: document.getElementById("btnA"),
+    B: document.getElementById("btnB"),
+    X: document.getElementById("btnX"),
+    Y: document.getElementById("btnY")
+  };
+
+  function handlePad(e) {
+    const next = { A:false, B:false, X:false, Y:false };
+
+    for (let t of e.touches) {
+
+      for (let key in btnMap) {
+
+        const r = btnMap[key].getBoundingClientRect();
+        const margin = 12;
+
+        if (
+          t.clientX >= r.left - margin &&
+          t.clientX <= r.right + margin &&
+          t.clientY >= r.top - margin &&
+          t.clientY <= r.bottom + margin
+        ) {
+          next[key] = true;
+        }
+      }
+    }
+
+    for (let key in btnMap) {
+      gamepadState[key] = next[key];
+      btnMap[key].classList.toggle("active", next[key]);
+    }
+  }
+
+  pad.addEventListener("touchstart", handlePad, { passive:false });
+  pad.addEventListener("touchmove", handlePad, { passive:false });
+  pad.addEventListener("touchend", handlePad);
+  pad.addEventListener("touchcancel", handlePad);
+
 })();
