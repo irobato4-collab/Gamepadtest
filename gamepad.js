@@ -60,7 +60,7 @@
 
   // nipplejs読み込み
   const script = document.createElement("script");
-  script.src = "https://cdn.jsdelivr.net/npm/nipplejs@0.10.1/dist/nipplejs.min.js";
+  script.src = "nipplejs.min.js";
   script.onload = () => {
 
     const joystick = nipplejs.create({
