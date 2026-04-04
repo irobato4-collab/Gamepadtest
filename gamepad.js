@@ -2,7 +2,7 @@
 
   // ⭐ 切り替え（HTML側からも変更できる）
   // "nipple" or "dpad"
-  const PAD_TYPE = window.GAMEPAD_TYPE || "nipple";
+  const PAD_TYPE = window.GAMEPAD_TYPE || "dpad";
 
   // ⭐ 外部から使える状態
   window.gamepadState = {
