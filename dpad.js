@@ -95,8 +95,9 @@
   `;
   document.head.appendChild(style);
 
-  // ===== D-pad（1方向固定）=====
+  // ===== D-pad（拡張＋安定）=====
   const zone = document.getElementById("zone");
+
   const dirs = {
     up: zone.querySelector(".up"),
     down: zone.querySelector(".down"),
@@ -111,6 +112,7 @@
     const cy = rect.top + rect.height / 2;
 
     const DEAD = 12;
+    const RANGE = 40; // ⭐ 外側拡張
 
     gamepadState.up = false;
     gamepadState.down = false;
@@ -121,11 +123,12 @@
 
     for (let t of e.touches) {
 
+      // ⭐ 拡張エリア判定
       if (
-        t.clientX < rect.left ||
-        t.clientX > rect.right ||
-        t.clientY < rect.top ||
-        t.clientY > rect.bottom
+        t.clientX < rect.left - RANGE ||
+        t.clientX > rect.right + RANGE ||
+        t.clientY < rect.top - RANGE ||
+        t.clientY > rect.bottom + RANGE
       ) continue;
 
       const x = t.clientX - cx;
@@ -133,7 +136,7 @@
 
       if (Math.abs(x) < DEAD && Math.abs(y) < DEAD) continue;
 
-      // ⭐ 1方向だけ確定
+      // ⭐ 1方向固定（バグ防止）
       if (Math.abs(x) > Math.abs(y)) {
         if (x > 0) {
           gamepadState.right = true;
@@ -159,7 +162,7 @@
   zone.addEventListener("touchend", handleDpad);
   zone.addEventListener("touchcancel", handleDpad);
 
-  // ===== ABXY（同時押し安定版）=====
+  // ===== ABXY（同時押し安定）=====
   const pad = document.getElementById("pad");
 
   const btnMap = {
@@ -177,9 +180,7 @@
       for (let key in btnMap) {
 
         const r = btnMap[key].getBoundingClientRect();
-
-        // ⭐ 少しだけ広げる（重ならないレベル）
-        const margin = 12;
+        const margin = 12; // ⭐ 押しやすく
 
         if (
           t.clientX >= r.left - margin &&
