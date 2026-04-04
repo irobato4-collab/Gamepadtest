@@ -28,13 +28,13 @@
 
   const style = document.createElement("style");
   style.textContent = `
-    /* ⭐ D-pad拡大 */
+    /* ===== D-pad ===== */
     #zone {
       position:absolute;
-      bottom:50px;
-      left:50px;
-      width:230px;   /* ← ここ変更 */
-      height:230px;  /* ← ここ変更 */
+      bottom:55px;
+      left:55px;
+      width:200px;   /* ⭐ ちょうどいいサイズ */
+      height:200px;
       touch-action:none;
     }
 
@@ -56,35 +56,35 @@
       background:white;
       opacity:0.4;
       pointer-events:none;
-      border-radius:14px;
+      border-radius:12px;
     }
 
     .stick.active {
       opacity:1;
     }
 
-    /* ⭐ サイズも少し大きくする */
+    /* ⭐ バランス調整 */
     .stick.up {
-      width:70px;
-      height:190px;
+      width:65px;
+      height:165px;
       transform:translate(-50%, -100%);
     }
 
     .stick.down {
-      width:70px;
-      height:190px;
+      width:65px;
+      height:165px;
       transform:translate(-50%, 0%);
     }
 
     .stick.left {
-      width:190px;
-      height:70px;
+      width:165px;
+      height:65px;
       transform:translate(-100%, -50%);
     }
 
     .stick.right {
-      width:190px;
-      height:70px;
+      width:165px;
+      height:65px;
       transform:translate(0%, -50%);
     }
 
@@ -137,8 +137,8 @@
     const cx = rect.left + rect.width / 2;
     const cy = rect.top + rect.height / 2;
 
-    const DEAD = 14;
-    const RANGE = 50;
+    const DEAD = 12;
+    const RANGE = 40;
 
     gamepadState.up = false;
     gamepadState.down = false;
