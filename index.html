@@ -2,27 +2,70 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<title>ゲームパッドテスト</title>
-</head>
-<body>
-<h1>ゲームパッドボタン押下テスト</h1>
-<p id="status">ボタンを押してください</p>
+<title>ゲームテスト</title>
 
-<!-- 外部ゲームパッド -->
-<script src="d.js"></script>
+<style>
+body {
+  margin: 0;
+  background: #222;
+  overflow: hidden;
+}
+
+/* キャラ */
+#player {
+  position: absolute;
+  width: 50px;
+  height: 50px;
+  background: cyan;
+  left: 100px;
+  top: 100px;
+}
+</style>
+</head>
+
+<body>
+
+<div id="player"></div>
+
+<!-- ⭐ ここに自分のCDN -->
+<script src="gamepad.js"></script>
 
 <script>
-const status = document.getElementById("status");
+const player = document.getElementById("player");
 
-const buttons = ["gp-A","gp-B","gp-X","gp-Y",
-                 "gp-L","gp-R","gp-up","gp-down","gp-left","gp-right",
-                 "gp-start","gp-select"];
+let x = 100;
+let y = 100;
+const speed = 4;
 
-buttons.forEach(btnId => {
-    document.addEventListener(btnId + "-pressed", () => {
-        status.textContent = btnId.replace("gp-","") + " が押されました！";
-    });
-});
+function gameLoop() {
+
+  const g = window.gamepadState;
+
+  // 移動
+  if (g.up) y -= speed;
+  if (g.down) y += speed;
+  if (g.left) x -= speed;
+  if (g.right) x += speed;
+
+  // Aでちょっと加速
+  if (g.A) {
+    x += 2;
+  }
+
+  // Bで戻る（テスト用）
+  if (g.B) {
+    x -= 2;
+  }
+
+  // 画面に反映
+  player.style.left = x + "px";
+  player.style.top = y + "px";
+
+  requestAnimationFrame(gameLoop);
+}
+
+gameLoop();
 </script>
+
 </body>
 </html>
