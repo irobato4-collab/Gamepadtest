@@ -61,26 +61,26 @@
 
     /* ⭐ ここが今回の変更（外まで伸ばす） */
     .up::before {
-      width:60px;
+      width:50px;
       height:150px;
       transform:translate(-50%, -100%);
     }
 
     .down::before {
-      width:60px;
+      width:50px;
       height:150px;
       transform:translate(-50%, 0%);
     }
 
     .left::before {
       width:150px;
-      height:60px;
+      height:50px;
       transform:translate(-100%, -50%);
     }
 
     .right::before {
       width:150px;
-      height:60px;
+      height:50px;
       transform:translate(0%, -50%);
     }
 
