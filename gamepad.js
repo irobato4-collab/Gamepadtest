@@ -1,5 +1,9 @@
 (function () {
 
+  // ⭐ 切り替え（HTML側からも変更できる）
+  // "nipple" or "dpad"
+  const PAD_TYPE = window.GAMEPAD_TYPE || "nipple";
+
   // ⭐ 外部から使える状態
   window.gamepadState = {
     up: false,
@@ -12,7 +16,7 @@
     Y: false
   };
 
-  // HTML生成（ログなし）
+  // HTML生成（そのまま）
   document.body.insertAdjacentHTML("beforeend", `
     <div id="zone" style="
       position:absolute; bottom:60px; left:60px;
@@ -30,7 +34,7 @@
     </div>
   `);
 
-  // CSS
+  // CSS（そのまま）
   const style = document.createElement("style");
   style.textContent = `
     .btn {
@@ -58,48 +62,90 @@
   `;
   document.head.appendChild(style);
 
-  // nipplejs読み込み
-  const script = document.createElement("script");
-  script.src = "nipplejs.min.js";
-  script.onload = () => {
+  // =========================
+  // 🎮 入力リセット関数
+  // =========================
+  function resetDir() {
+    window.gamepadState.up = false;
+    window.gamepadState.down = false;
+    window.gamepadState.left = false;
+    window.gamepadState.right = false;
+  }
 
-    const joystick = nipplejs.create({
-      zone: document.getElementById('zone'),
-      mode: 'static',
-      position: { left: '50%', top: '50%' },
-      color: 'white'
+  // =========================
+  // 🎮 nipplejs モード
+  // =========================
+  function initNipple() {
+    const script = document.createElement("script");
+    script.src = "https://cdn.jsdelivr.net/npm/nipplejs@0.10.1/dist/nipplejs.min.js";
+
+    script.onload = () => {
+      const joystick = nipplejs.create({
+        zone: document.getElementById('zone'),
+        mode: 'static',
+        position: { left: '50%', top: '50%' },
+        color: 'white'
+      });
+
+      joystick.on('move', (evt, data) => {
+        if (!data.vector) return;
+
+        const x = data.vector.x;
+        const y = data.vector.y;
+
+        resetDir();
+
+        if (y > 0.5) window.gamepadState.up = true;
+        if (y < -0.5) window.gamepadState.down = true;
+        if (x < -0.5) window.gamepadState.left = true;
+        if (x > 0.5) window.gamepadState.right = true;
+      });
+
+      joystick.on('end', resetDir);
+    };
+
+    document.head.appendChild(script);
+  }
+
+  // =========================
+  // 🎮 D-pad（virtual-gamepad-lib）
+  // =========================
+  async function initDpad() {
+
+    const { GamepadEmulator } = await import('https://cdn.jsdelivr.net/npm/virtual-gamepad-lib/+esm');
+
+    const zone = document.getElementById('zone');
+
+    // 見た目をD-pad用に少し調整（中身だけ置く）
+    zone.style.width = "120px";
+    zone.style.height = "120px";
+
+    const pad = new GamepadEmulator({
+      container: zone,
+      type: 'dpad'
     });
 
-    joystick.on('move', (evt, data) => {
-      if (!data.vector) return;
-
-      const x = data.vector.x;
-      const y = data.vector.y;
-
-      // リセット
-      window.gamepadState.up = false;
-      window.gamepadState.down = false;
-      window.gamepadState.left = false;
-      window.gamepadState.right = false;
-
-      // 判定（しきい値あり）
-      if (y > 0.5) window.gamepadState.up = true;
-      if (y < -0.5) window.gamepadState.down = true;
-      if (x < -0.5) window.gamepadState.left = true;
-      if (x > 0.5) window.gamepadState.right = true;
+    pad.on('change', (state) => {
+      // state: {up,down,left,right}
+      window.gamepadState.up = !!state.up;
+      window.gamepadState.down = !!state.down;
+      window.gamepadState.left = !!state.left;
+      window.gamepadState.right = !!state.right;
     });
+  }
 
-    joystick.on('end', () => {
-      window.gamepadState.up = false;
-      window.gamepadState.down = false;
-      window.gamepadState.left = false;
-      window.gamepadState.right = false;
-    });
-  };
+  // =========================
+  // 🎮 モード分岐
+  // =========================
+  if (PAD_TYPE === "dpad") {
+    initDpad();
+  } else {
+    initNipple();
+  }
 
-  document.head.appendChild(script);
-
-  // ボタン
+  // =========================
+  // 🔘 ボタン（そのまま）
+  // =========================
   function setupButton(id, key) {
     const btn = document.getElementById(id);
 
