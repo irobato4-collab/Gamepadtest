@@ -1,10 +1,12 @@
 (function () {
 
+  // ===== 状態 =====
   window.gamepadState = {
     up:false, down:false, left:false, right:false,
     A:false, B:false, X:false, Y:false
   };
 
+  // ===== HTML =====
   document.body.insertAdjacentHTML("beforeend", `
     <div id="zone"></div>
 
@@ -16,6 +18,7 @@
     </div>
   `);
 
+  // ===== CSS =====
   const style = document.createElement("style");
   style.textContent = `
     #zone {
@@ -100,6 +103,7 @@
   function handleDpad(e) {
     const rect = zone.getBoundingClientRect();
 
+    // 初期化
     gamepadState.up = false;
     gamepadState.down = false;
     gamepadState.left = false;
@@ -108,32 +112,34 @@
 
     for (let t of e.touches) {
 
+      // ⭐ 少し外でもOK
       if (
-        t.clientX < rect.left || t.clientX > rect.right ||
-        t.clientY < rect.top || t.clientY > rect.bottom
+        t.clientX < rect.left - 20 || t.clientX > rect.right + 20 ||
+        t.clientY < rect.top - 20 || t.clientY > rect.bottom + 20
       ) continue;
 
       const x = t.clientX - (rect.left + rect.width / 2);
       const y = t.clientY - (rect.top + rect.height / 2);
 
-      if (Math.abs(x) < 15 && Math.abs(y) < 15) continue;
+      // ⭐ デッドゾーン
+      if (Math.abs(x) < 20 && Math.abs(y) < 20) continue;
 
-      if (Math.abs(x) > Math.abs(y)) {
-        if (x > 0) {
-          gamepadState.right = true;
-          dirs.right.classList.add("active");
-        } else {
-          gamepadState.left = true;
-          dirs.left.classList.add("active");
-        }
-      } else {
-        if (y > 0) {
-          gamepadState.down = true;
-          dirs.down.classList.add("active");
-        } else {
-          gamepadState.up = true;
-          dirs.up.classList.add("active");
-        }
+      // ⭐ 斜めOK（同時ON）
+      if (x > 20) {
+        gamepadState.right = true;
+        dirs.right.classList.add("active");
+      }
+      if (x < -20) {
+        gamepadState.left = true;
+        dirs.left.classList.add("active");
+      }
+      if (y > 20) {
+        gamepadState.down = true;
+        dirs.down.classList.add("active");
+      }
+      if (y < -20) {
+        gamepadState.up = true;
+        dirs.up.classList.add("active");
       }
     }
   }
@@ -179,7 +185,7 @@
       for (let key in btnMap) {
 
         const base = btnMap[key].getBoundingClientRect();
-        const b = expandRect(base, 20); // ← 当たり判定拡張
+        const b = expandRect(base, 20); // ⭐ 押しやすく
 
         if (
           t.clientX >= b.left &&
@@ -192,7 +198,6 @@
       }
     }
 
-    // 反映
     for (let key in btnMap) {
       gamepadState[key] = nextState[key];
 
