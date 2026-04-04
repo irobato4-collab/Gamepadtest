@@ -103,7 +103,9 @@
   function handleDpad(e) {
     const rect = zone.getBoundingClientRect();
 
-    // 初期化
+    const DEAD = 12;   // ⭐ 調整済み
+    const RANGE = 15;  // ⭐ 調整済み
+
     gamepadState.up = false;
     gamepadState.down = false;
     gamepadState.left = false;
@@ -112,32 +114,29 @@
 
     for (let t of e.touches) {
 
-      // ⭐ 少し外でもOK
       if (
-        t.clientX < rect.left - 20 || t.clientX > rect.right + 20 ||
-        t.clientY < rect.top - 20 || t.clientY > rect.bottom + 20
+        t.clientX < rect.left - RANGE || t.clientX > rect.right + RANGE ||
+        t.clientY < rect.top - RANGE || t.clientY > rect.bottom + RANGE
       ) continue;
 
       const x = t.clientX - (rect.left + rect.width / 2);
       const y = t.clientY - (rect.top + rect.height / 2);
 
-      // ⭐ デッドゾーン
-      if (Math.abs(x) < 20 && Math.abs(y) < 20) continue;
+      if (Math.abs(x) < DEAD && Math.abs(y) < DEAD) continue;
 
-      // ⭐ 斜めOK（同時ON）
-      if (x > 20) {
+      if (x > DEAD) {
         gamepadState.right = true;
         dirs.right.classList.add("active");
       }
-      if (x < -20) {
+      if (x < -DEAD) {
         gamepadState.left = true;
         dirs.left.classList.add("active");
       }
-      if (y > 20) {
+      if (y > DEAD) {
         gamepadState.down = true;
         dirs.down.classList.add("active");
       }
-      if (y < -20) {
+      if (y < -DEAD) {
         gamepadState.up = true;
         dirs.up.classList.add("active");
       }
@@ -185,7 +184,7 @@
       for (let key in btnMap) {
 
         const base = btnMap[key].getBoundingClientRect();
-        const b = expandRect(base, 20); // ⭐ 押しやすく
+        const b = expandRect(base, 20); // ⭐ 押しやすい
 
         if (
           t.clientX >= b.left &&
