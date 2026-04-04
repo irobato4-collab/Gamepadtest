@@ -1,6 +1,9 @@
+<script type="module">
+import { GamepadEmulator } from 'https://cdn.jsdelivr.net/npm/virtual-gamepad-lib/+esm';
+
 (function () {
 
-  // ⭐ 外部から使える状態
+  // ⭐ 状態
   window.gamepadState = {
     up: false,
     down: false,
@@ -12,7 +15,7 @@
     Y: false
   };
 
-  // HTML生成（ログなし）
+  // HTML（ゾーンはそのまま）
   document.body.insertAdjacentHTML("beforeend", `
     <div id="zone" style="
       position:absolute; bottom:60px; left:60px;
@@ -30,7 +33,7 @@
     </div>
   `);
 
-  // CSS
+  // CSS（そのまま）
   const style = document.createElement("style");
   style.textContent = `
     .btn {
@@ -58,48 +61,35 @@
   `;
   document.head.appendChild(style);
 
-  // nipplejs読み込み
-  const script = document.createElement("script");
-  script.src = "https://cdnjs.cloudflare.com/ajax/libs/nipplejs/0.9.0/nipplejs.min.js";
-  script.onload = () => {
+  // 🎮 Gamepad Emulator
+  const gamepad = new GamepadEmulator();
 
-    const joystick = nipplejs.create({
-      zone: document.getElementById('zone'),
-      mode: 'static',
-      position: { left: '50%', top: '50%' },
-      color: 'white'
-    });
+  // 十字キー（D-pad）
+  gamepad.addDpad({
+    element: document.getElementById("zone"),
+    size: 150,
+  });
 
-    joystick.on('move', (evt, data) => {
-      if (!data.vector) return;
+  gamepad.connect();
 
-      const x = data.vector.x;
-      const y = data.vector.y;
+  // 🎯 状態を同期（重要）
+  function update() {
+    const gp = navigator.getGamepads()[0];
+    if (gp) {
+      const x = gp.axes[0];
+      const y = gp.axes[1];
 
-      // リセット
-      window.gamepadState.up = false;
-      window.gamepadState.down = false;
-      window.gamepadState.left = false;
-      window.gamepadState.right = false;
+      // しきい値
+      window.gamepadState.left  = x < -0.5;
+      window.gamepadState.right = x > 0.5;
+      window.gamepadState.up    = y < -0.5;
+      window.gamepadState.down  = y > 0.5;
+    }
+    requestAnimationFrame(update);
+  }
+  update();
 
-      // 判定（しきい値あり）
-      if (y > 0.5) window.gamepadState.up = true;
-      if (y < -0.5) window.gamepadState.down = true;
-      if (x < -0.5) window.gamepadState.left = true;
-      if (x > 0.5) window.gamepadState.right = true;
-    });
-
-    joystick.on('end', () => {
-      window.gamepadState.up = false;
-      window.gamepadState.down = false;
-      window.gamepadState.left = false;
-      window.gamepadState.right = false;
-    });
-  };
-
-  document.head.appendChild(script);
-
-  // ボタン
+  // 🔘 ボタン
   function setupButton(id, key) {
     const btn = document.getElementById(id);
 
@@ -118,3 +108,4 @@
   setupButton("btnY", "Y");
 
 })();
+</script>
