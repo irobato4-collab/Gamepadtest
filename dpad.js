@@ -1,6 +1,5 @@
 (function () {
 
-  // ⭐ 外部から使える状態
   window.gamepadState = {
     up: false,
     down: false,
@@ -12,7 +11,6 @@
     Y: false
   };
 
-  // HTML生成
   document.body.insertAdjacentHTML("beforeend", `
     <div id="zone"></div>
 
@@ -24,11 +22,8 @@
     </div>
   `);
 
-  // CSS
   const style = document.createElement("style");
   style.textContent = `
-
-    /* ===== D-pad ===== */
     #zone {
       position:absolute;
       bottom:60px;
@@ -61,31 +56,11 @@
       opacity:1;
     }
 
-    .up::before {
-      width:60px;
-      height:90px;
-      transform:translate(-50%, -100%);
-    }
+    .up::before { width:60px; height:90px; transform:translate(-50%, -100%); }
+    .down::before { width:60px; height:90px; transform:translate(-50%, 0%); }
+    .left::before { width:90px; height:60px; transform:translate(-100%, -50%); }
+    .right::before { width:90px; height:60px; transform:translate(0%, -50%); }
 
-    .down::before {
-      width:60px;
-      height:90px;
-      transform:translate(-50%, 0%);
-    }
-
-    .left::before {
-      width:90px;
-      height:60px;
-      transform:translate(-100%, -50%);
-    }
-
-    .right::before {
-      width:90px;
-      height:60px;
-      transform:translate(0%, -50%);
-    }
-
-    /* ===== ボタン ===== */
     #pad {
       position:absolute;
       bottom:40px;
@@ -105,64 +80,100 @@
       line-height:60px;
       font-size:20px;
       color:white;
-      user-select:none;
+    }
+
+    .btn.active {
+      background:rgba(255,255,255,0.6);
     }
 
     #btnA { left:130px; top:70px; }
     #btnB { left:70px; top:130px; }
     #btnX { left:70px; top:10px; }
     #btnY { left:10px; top:70px; }
-
-    .btn.active {
-      background:rgba(255,255,255,0.6);
-    }
-
   `;
   document.head.appendChild(style);
 
-  // ===== D-pad生成 =====
   const zone = document.getElementById("zone");
   zone.innerHTML = `
-    <div class="dir up" data-key="up"></div>
-    <div class="dir down" data-key="down"></div>
-    <div class="dir left" data-key="left"></div>
-    <div class="dir right" data-key="right"></div>
+    <div class="dir up"></div>
+    <div class="dir down"></div>
+    <div class="dir left"></div>
+    <div class="dir right"></div>
   `;
 
-  // ===== D-pad入力 =====
-  document.querySelectorAll(".dir").forEach(btn => {
-    const key = btn.dataset.key;
+  const dirs = {
+    up: document.querySelector(".up"),
+    down: document.querySelector(".down"),
+    left: document.querySelector(".left"),
+    right: document.querySelector(".right")
+  };
 
-    const press = () => {
-      window.gamepadState[key] = true;
-      btn.classList.add("active");
-    };
+  function reset() {
+    for (let k in gamepadState) {
+      if (["up","down","left","right"].includes(k)) {
+        gamepadState[k] = false;
+      }
+    }
+    Object.values(dirs).forEach(d => d.classList.remove("active"));
+  }
 
-    const release = () => {
-      window.gamepadState[key] = false;
-      btn.classList.remove("active");
-    };
+  function updateDirection(x, y) {
+    reset();
 
-    btn.addEventListener("touchstart", press);
-    btn.addEventListener("touchend", release);
-    btn.addEventListener("touchcancel", release);
+    const absX = Math.abs(x);
+    const absY = Math.abs(y);
 
-    btn.addEventListener("mousedown", press);
-    btn.addEventListener("mouseup", release);
-    btn.addEventListener("mouseleave", release);
+    if (absX > absY) {
+      if (x > 0) {
+        gamepadState.right = true;
+        dirs.right.classList.add("active");
+      } else {
+        gamepadState.left = true;
+        dirs.left.classList.add("active");
+      }
+    } else {
+      if (y > 0) {
+        gamepadState.down = true;
+        dirs.down.classList.add("active");
+      } else {
+        gamepadState.up = true;
+        dirs.up.classList.add("active");
+      }
+    }
+  }
+
+  let rect;
+
+  zone.addEventListener("touchstart", e => {
+    rect = zone.getBoundingClientRect();
+    handleTouch(e);
   });
 
-  // ===== ボタン =====
+  zone.addEventListener("touchmove", e => {
+    handleTouch(e);
+  });
+
+  zone.addEventListener("touchend", reset);
+  zone.addEventListener("touchcancel", reset);
+
+  function handleTouch(e) {
+    const touch = e.touches[0];
+    const x = touch.clientX - (rect.left + rect.width / 2);
+    const y = touch.clientY - (rect.top + rect.height / 2);
+    updateDirection(x, y);
+  }
+
+  // ボタン
   function setupButton(id, key) {
     const btn = document.getElementById(id);
 
     const press = () => {
-      window.gamepadState[key] = true;
+      gamepadState[key] = true;
       btn.classList.add("active");
     };
 
     const release = () => {
-      window.gamepadState[key] = false;
+      gamepadState[key] = false;
       btn.classList.remove("active");
     };
 
