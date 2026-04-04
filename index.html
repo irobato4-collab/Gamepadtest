@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<title>ゲームテスト</title>
+<title>ジャンプゲーム</title>
 
 <style>
 body {
@@ -20,14 +20,24 @@ body {
   left: 100px;
   top: 100px;
 }
+
+/* 地面 */
+#ground {
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  height: 80px;
+  background: #444;
+}
 </style>
 </head>
 
 <body>
 
 <div id="player"></div>
+<div id="ground"></div>
 
-<!-- ⭐ ここに自分のCDN -->
+<!-- ⭐ 自分のgamepad.js -->
 <script src="gamepad.js"></script>
 
 <script>
@@ -35,26 +45,35 @@ const player = document.getElementById("player");
 
 let x = 100;
 let y = 100;
-const speed = 4;
+
+// ⭐ 物理っぽい設定
+let velocityY = 0;
+const gravity = 0.5;
+const jumpPower = -10;
+
+const groundY = window.innerHeight - 80 - 50; // 地面の位置
 
 function gameLoop() {
 
   const g = window.gamepadState;
 
-  // 移動
-  if (g.up) y -= speed;
-  if (g.down) y += speed;
-  if (g.left) x -= speed;
-  if (g.right) x += speed;
+  // 横移動
+  if (g.left) x -= 4;
+  if (g.right) x += 4;
 
-  // Aでちょっと加速
-  if (g.A) {
-    x += 2;
+  // ⭐ ジャンプ（地面にいるときだけ）
+  if (g.A && y >= groundY) {
+    velocityY = jumpPower;
   }
 
-  // Bで戻る（テスト用）
-  if (g.B) {
-    x -= 2;
+  // 重力
+  velocityY += gravity;
+  y += velocityY;
+
+  // 地面に着地
+  if (y > groundY) {
+    y = groundY;
+    velocityY = 0;
   }
 
   // 画面に反映
