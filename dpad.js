@@ -23,11 +23,9 @@ document.body.insertAdjacentHTML("beforeend", `
   <div id="btnY" class="btn">Y</div>  
 </div>
 
-<!-- LR -->
-<div id="btnL" class="btn small">L</div>
-<div id="btnR" class="btn small">R</div>
+<div id="btnL" class="btn lr">L</div>
+<div id="btnR" class="btn lr">R</div>
 
-<!-- START SELECT -->
 <div id="centerBtns">
   <div id="btnSelect" class="btn small">SEL</div>
   <div id="btnStart" class="btn small">STA</div>
@@ -55,20 +53,28 @@ height:220px;
 touch-action:none;  
 }
 
-/* ===== LR（左右対称）===== */
+/* ===== L R（横長＋上に移動）===== */
+.lr {
+width:140px;
+height:50px;
+border-radius:12px;
+line-height:50px;
+font-size:18px;
+}
+
 #btnL {
 position:absolute;
-bottom:260px;
-left:80px;
+bottom:340px; /* ← 上にした */
+left:40px;
 }
 
 #btnR {
 position:absolute;
-bottom:260px;
-right:120px;
+bottom:340px; /* ← 上にした */
+right:40px;
 }
 
-/* ===== 中央下 START/SELECT ===== */
+/* ===== 中央下 ===== */
 #centerBtns {
 position:absolute;
 bottom:10px;
@@ -208,8 +214,6 @@ zone.addEventListener("touchend", handleDpad);
 zone.addEventListener("touchcancel", handleDpad);
 
 // ===== ボタン =====
-const pad = document.getElementById("pad");
-
 const btnMap = {
 A: document.getElementById("btnA"),
 B: document.getElementById("btnB"),
