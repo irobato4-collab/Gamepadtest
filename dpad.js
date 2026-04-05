@@ -95,7 +95,7 @@
   `;
   document.head.appendChild(style);
 
-  // ===== D-pad（同時押し対応版）=====
+  // ===== D-pad（ヒットボックス方式）=====
   const zone = document.getElementById("zone");
 
   const dirs = {
@@ -106,54 +106,37 @@
   };
 
   function handleDpad(e) {
-    const rect = zone.getBoundingClientRect();
-
-    const cx = rect.left + rect.width / 2;
-    const cy = rect.top + rect.height / 2;
-
-    const DEAD = 12;
-
-    // リセット
-    gamepadState.up = false;
-    gamepadState.down = false;
-    gamepadState.left = false;
-    gamepadState.right = false;
-
-    Object.values(dirs).forEach(d => d.classList.remove("active"));
+    const next = {
+      up:false,
+      down:false,
+      left:false,
+      right:false
+    };
 
     for (let t of e.touches) {
 
-      if (
-        t.clientX < rect.left ||
-        t.clientX > rect.right ||
-        t.clientY < rect.top ||
-        t.clientY > rect.bottom
-      ) continue;
+      for (let key in dirs) {
 
-      const x = t.clientX - cx;
-      const y = t.clientY - cy;
+        const r = dirs[key].getBoundingClientRect();
 
-      if (Math.abs(x) < DEAD && Math.abs(y) < DEAD) continue;
+        // ⭐ 押しやすさのカギ（少し広げる）
+        const margin = 14;
 
-      // ⭐ 横
-      if (x > DEAD) {
-        gamepadState.right = true;
-        dirs.right.classList.add("active");
+        if (
+          t.clientX >= r.left - margin &&
+          t.clientX <= r.right + margin &&
+          t.clientY >= r.top - margin &&
+          t.clientY <= r.bottom + margin
+        ) {
+          next[key] = true;
+        }
       }
-      if (x < -DEAD) {
-        gamepadState.left = true;
-        dirs.left.classList.add("active");
-      }
+    }
 
-      // ⭐ 縦
-      if (y > DEAD) {
-        gamepadState.down = true;
-        dirs.down.classList.add("active");
-      }
-      if (y < -DEAD) {
-        gamepadState.up = true;
-        dirs.up.classList.add("active");
-      }
+    // 反映
+    for (let key in dirs) {
+      gamepadState[key] = next[key];
+      dirs[key].classList.toggle("active", next[key]);
     }
   }
 
