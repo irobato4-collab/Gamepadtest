@@ -95,8 +95,9 @@
   `;
   document.head.appendChild(style);
 
-  // ===== D-pad（1方向固定）=====
+  // ===== D-pad（同時押し対応版）=====
   const zone = document.getElementById("zone");
+
   const dirs = {
     up: zone.querySelector(".up"),
     down: zone.querySelector(".down"),
@@ -112,6 +113,7 @@
 
     const DEAD = 12;
 
+    // リセット
     gamepadState.up = false;
     gamepadState.down = false;
     gamepadState.left = false;
@@ -133,23 +135,24 @@
 
       if (Math.abs(x) < DEAD && Math.abs(y) < DEAD) continue;
 
-      // ⭐ 1方向だけ確定
-      if (Math.abs(x) > Math.abs(y)) {
-        if (x > 0) {
-          gamepadState.right = true;
-          dirs.right.classList.add("active");
-        } else {
-          gamepadState.left = true;
-          dirs.left.classList.add("active");
-        }
-      } else {
-        if (y > 0) {
-          gamepadState.down = true;
-          dirs.down.classList.add("active");
-        } else {
-          gamepadState.up = true;
-          dirs.up.classList.add("active");
-        }
+      // ⭐ 横
+      if (x > DEAD) {
+        gamepadState.right = true;
+        dirs.right.classList.add("active");
+      }
+      if (x < -DEAD) {
+        gamepadState.left = true;
+        dirs.left.classList.add("active");
+      }
+
+      // ⭐ 縦
+      if (y > DEAD) {
+        gamepadState.down = true;
+        dirs.down.classList.add("active");
+      }
+      if (y < -DEAD) {
+        gamepadState.up = true;
+        dirs.up.classList.add("active");
       }
     }
   }
@@ -159,7 +162,7 @@
   zone.addEventListener("touchend", handleDpad);
   zone.addEventListener("touchcancel", handleDpad);
 
-  // ===== ABXY（同時押し安定版）=====
+  // ===== ABXY（そのまま）=====
   const pad = document.getElementById("pad");
 
   const btnMap = {
@@ -177,8 +180,6 @@
       for (let key in btnMap) {
 
         const r = btnMap[key].getBoundingClientRect();
-
-        // ⭐ 少しだけ広げる（重ならないレベル）
         const margin = 12;
 
         if (
