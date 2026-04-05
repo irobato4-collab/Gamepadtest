@@ -2,123 +2,67 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<title>Gamepad Debug UI</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>D-pad Test</title>
 
 <style>
 body {
   margin:0;
   background:#111;
-  font-family:monospace;
   color:white;
+  font-family:sans-serif;
 }
 
-/* ===== コンテナ ===== */
-#debugContainer {
-  position:absolute;
-  top:20px;
-  left:20px;
-  display:flex;
-  flex-direction:column;
-  gap:10px;
+/* 表示パネル */
+#debug {
+  position:fixed;
+  top:10px;
+  left:10px;
+  background:rgba(0,0,0,0.6);
+  padding:12px;
+  border-radius:10px;
+  font-size:14px;
+  line-height:1.6;
 }
 
-/* ===== 行 ===== */
-.row {
-  display:flex;
-  gap:10px;
-}
-
-/* ===== ボタン表示 ===== */
-.key {
-  width:60px;
-  height:60px;
-  border-radius:12px;
-  background:#333;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  font-size:18px;
-  border:2px solid #555;
-  transition:0.1s;
-}
-
-/* 押されてる状態 */
-.key.active {
-  background:#00ccff;
-  color:black;
-  border-color:#00ccff;
-  transform:scale(1.1);
-}
-
-/* 方向キー配置 */
-#dpad {
-  display:grid;
-  grid-template-columns:60px 60px 60px;
-  grid-template-rows:60px 60px 60px;
-  gap:5px;
-}
-
-.empty {
-  visibility:hidden;
-}
+.on { color:#00ff88; }
+.off { color:#666; }
 </style>
 </head>
-
 <body>
 
-<div id="debugContainer">
+<div id="debug"></div>
 
-  <!-- D-pad -->
-  <div id="dpad">
-    <div class="empty"></div>
-    <div class="key" id="up">↑</div>
-    <div class="empty"></div>
-
-    <div class="key" id="left">←</div>
-    <div class="empty"></div>
-    <div class="key" id="right">→</div>
-
-    <div class="empty"></div>
-    <div class="key" id="down">↓</div>
-    <div class="empty"></div>
-  </div>
-
-  <!-- ボタン -->
-  <div class="row">
-    <div class="key" id="A">A</div>
-    <div class="key" id="B">B</div>
-    <div class="key" id="X">X</div>
-    <div class="key" id="Y">Y</div>
-  </div>
-
-</div>
-
-<!-- ⭐ ここであなたのgamepad.jsを読み込む -->
-<script src="dpad.js"></script>
+<!-- ★ ここで君のJSを読み込む -->
+<script src="./dpad.js"></script>
 
 <script>
-function updateUI() {
-  const g = window.gamepadState;
-  if (!g) {
-    requestAnimationFrame(updateUI);
-    return;
-  }
+const debug = document.getElementById("debug");
 
-  for (let key in g) {
-    const el = document.getElementById(key);
-    if (!el) continue;
+const keys = [
+  "up","down","left","right",
+  "A","B","X","Y",
+  "L","R","start","select"
+];
 
-    if (g[key]) {
-      el.classList.add("active");
-    } else {
-      el.classList.remove("active");
-    }
-  }
+function update() {
+  let html = "";
 
-  requestAnimationFrame(updateUI);
+  keys.forEach(k => {
+    const v = window.gamepadState?.[k];
+    html += `<div class="${v ? "on":"off"}">${k}: ${v}</div>`;
+  });
+
+  // 同時押し検出
+  const active = keys.filter(k => window.gamepadState?.[k]);
+  html += "<hr>";
+  html += "<div>同時押し: " + (active.join(", ") || "なし") + "</div>";
+
+  debug.innerHTML = html;
+  requestAnimationFrame(update);
 }
 
-updateUI();
+update();
 </script>
 
 </body>
