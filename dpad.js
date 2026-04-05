@@ -53,25 +53,29 @@ height:220px;
 touch-action:none;  
 }
 
-/* ===== L R（横長＋上に移動）===== */
+/* ===== L R（完全上書き）===== */
 .lr {
-width:140px;
-height:50px;
-border-radius:12px;
-line-height:50px;
-font-size:18px;
+width:160px !important;
+height:50px !important;
+border-radius:6px !important; /* ←ほぼ四角 */
+line-height:50px !important;
+font-size:18px !important;
+
+/* 半透明 */
+background:rgba(255,255,255,0.25) !important;
+border:2px solid rgba(255,255,255,0.6) !important;
 }
 
 #btnL {
 position:absolute;
-bottom:340px; /* ← 上にした */
-left:40px;
+bottom:340px;
+left:30px;
 }
 
 #btnR {
 position:absolute;
-bottom:340px; /* ← 上にした */
-right:40px;
+bottom:340px;
+right:30px;
 }
 
 /* ===== 中央下 ===== */
@@ -84,15 +88,8 @@ width:160px;
 height:70px;
 }
 
-#btnSelect {
-left:0;
-top:0;
-}
-
-#btnStart {
-right:0;
-top:0;
-}
+#btnSelect { left:0; top:0; }
+#btnStart { right:0; top:0; }
 
 .dir {  
 position:absolute;  
@@ -153,7 +150,7 @@ background:rgba(255,255,255,0.7);
 `;
 document.head.appendChild(style);
 
-// ===== D-pad =====
+// ===== D-pad（そのまま）=====
 const zone = document.getElementById("zone");
 const dirs = {
 up: zone.querySelector(".up"),
@@ -213,7 +210,7 @@ zone.addEventListener("touchmove", handleDpad, { passive:false });
 zone.addEventListener("touchend", handleDpad);
 zone.addEventListener("touchcancel", handleDpad);
 
-// ===== ボタン =====
+// ===== ボタン（そのまま）=====
 const btnMap = {
 A: document.getElementById("btnA"),
 B: document.getElementById("btnB"),
