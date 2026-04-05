@@ -3,7 +3,8 @@
 // ===== 状態 =====
 window.gamepadState = {
 up:false, down:false, left:false, right:false,
-A:false, B:false, X:false, Y:false
+A:false, B:false, X:false, Y:false,
+start:false, select:false, L:false, R:false   // ←追加
 };
 
 // ===== HTML =====
@@ -22,6 +23,13 @@ document.body.insertAdjacentHTML("beforeend", `
   <div id="btnY" class="btn">Y</div>  
 </div>
 
+<!-- 追加ボタン -->
+<div id="subPad">
+  <div id="btnStart" class="btn small">START</div>
+  <div id="btnSelect" class="btn small">SELECT</div>
+  <div id="btnL" class="btn small">L</div>
+  <div id="btnR" class="btn small">R</div>
+</div>
 `);
 
 // ===== CSS =====
@@ -72,6 +80,16 @@ touch-action:none;
   touch-action:none;  
 }  
 
+/* 追加パッド */
+#subPad {
+  position:absolute;
+  bottom:280px;
+  right:80px;
+  width:240px;
+  height:120px;
+  touch-action:none;
+}
+
 .btn {  
   position:absolute;  
   width:70px;  
@@ -85,6 +103,14 @@ touch-action:none;
   font-size:22px;  
 }  
 
+/* 小さいボタン */
+.small {
+  width:60px;
+  height:60px;
+  line-height:60px;
+  font-size:14px;
+}
+
 .btn.active {  
   background:rgba(255,255,255,0.7);  
 }  
@@ -94,10 +120,16 @@ touch-action:none;
 #btnX { left:80px; top:10px; }  
 #btnY { left:10px; top:80px; }
 
+/* 追加配置 */
+#btnStart { left:130px; top:20px; }
+#btnSelect { left:40px; top:20px; }
+#btnL { left:0px; top:70px; }
+#btnR { left:180px; top:70px; }
+
 `;
 document.head.appendChild(style);
 
-// ===== D-pad（1方向固定）=====
+// ===== D-pad =====
 const zone = document.getElementById("zone");
 const dirs = {
 up: zone.querySelector(".up"),
@@ -135,7 +167,6 @@ for (let t of e.touches) {
 
   if (Math.abs(x) < DEAD && Math.abs(y) < DEAD) continue;  
 
-  // ⭐ 1方向だけ確定  
   if (Math.abs(x) > Math.abs(y)) {  
     if (x > 0) {  
       gamepadState.right = true;  
@@ -162,26 +193,30 @@ zone.addEventListener("touchmove", handleDpad, { passive:false });
 zone.addEventListener("touchend", handleDpad);
 zone.addEventListener("touchcancel", handleDpad);
 
-// ===== ABXY（同時押し安定版）=====
+// ===== ボタン（ABXY + 追加）=====
 const pad = document.getElementById("pad");
+const subPad = document.getElementById("subPad");
 
 const btnMap = {
 A: document.getElementById("btnA"),
 B: document.getElementById("btnB"),
 X: document.getElementById("btnX"),
-Y: document.getElementById("btnY")
+Y: document.getElementById("btnY"),
+start: document.getElementById("btnStart"),
+select: document.getElementById("btnSelect"),
+L: document.getElementById("btnL"),
+R: document.getElementById("btnR")
 };
 
 function handlePad(e) {
-const next = { A:false, B:false, X:false, Y:false };
+const next = {
+A:false, B:false, X:false, Y:false,
+start:false, select:false, L:false, R:false
+};
 
 for (let t of e.touches) {  
-
   for (let key in btnMap) {  
-
     const r = btnMap[key].getBoundingClientRect();  
-
-    // ⭐ 少しだけ広げる（重ならないレベル）  
     const margin = 12;  
 
     if (  
@@ -206,5 +241,10 @@ pad.addEventListener("touchstart", handlePad, { passive:false });
 pad.addEventListener("touchmove", handlePad, { passive:false });
 pad.addEventListener("touchend", handlePad);
 pad.addEventListener("touchcancel", handlePad);
+
+subPad.addEventListener("touchstart", handlePad, { passive:false });
+subPad.addEventListener("touchmove", handlePad, { passive:false });
+subPad.addEventListener("touchend", handlePad);
+subPad.addEventListener("touchcancel", handlePad);
 
 })();
