@@ -30,8 +30,8 @@
       position:absolute;
       bottom:60px;
       left:60px;
-      width:180px;
-      height:180px;
+      width:190px;
+      height:190px;
       touch-action:none;
     }
 
@@ -57,10 +57,10 @@
 
     .dir.active::before { opacity:1; }
 
-    .up::before { width:60px; height:90px; transform:translate(-50%, -100%); }
-    .down::before { width:60px; height:90px; transform:translate(-50%, 0%); }
-    .left::before { width:90px; height:60px; transform:translate(-100%, -50%); }
-    .right::before { width:90px; height:60px; transform:translate(0%, -50%); }
+    .up::before { width:55px; height:100px; transform:translate(-50%, -100%); }
+    .down::before { width:55px; height:100px; transform:translate(-50%, 0%); }
+    .left::before { width:100px; height:55px; transform:translate(-100%, -50%); }
+    .right::before { width:100px; height:55px; transform:translate(0%, -50%); }
 
     #pad {
       position:absolute;
