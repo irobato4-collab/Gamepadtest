@@ -1,12 +1,10 @@
 (function () {
 
-  // ===== 状態 =====
   window.gamepadState = {
     up:false, down:false, left:false, right:false,
     A:false, B:false, X:false, Y:false
   };
 
-  // ===== HTML =====
   document.body.insertAdjacentHTML("beforeend", `
     <div id="zone">
       <div class="dir up"></div>
@@ -23,7 +21,6 @@
     </div>
   `);
 
-  // ===== CSS =====
   const style = document.createElement("style");
   style.textContent = `
     #zone {
@@ -95,7 +92,7 @@
   `;
   document.head.appendChild(style);
 
-  // ===== D-pad（ヒットボックス方式）=====
+  // ===== D-pad（座標判定）=====
   const zone = document.getElementById("zone");
 
   const dirs = {
@@ -106,37 +103,51 @@
   };
 
   function handleDpad(e) {
-    const next = {
-      up:false,
-      down:false,
-      left:false,
-      right:false
-    };
+    const rect = zone.getBoundingClientRect();
+
+    const cx = rect.left + rect.width / 2;
+    const cy = rect.top + rect.height / 2;
+
+    const DEAD = 10;
+
+    gamepadState.up = false;
+    gamepadState.down = false;
+    gamepadState.left = false;
+    gamepadState.right = false;
+
+    Object.values(dirs).forEach(d => d.classList.remove("active"));
 
     for (let t of e.touches) {
 
-      for (let key in dirs) {
+      if (
+        t.clientX < rect.left ||
+        t.clientX > rect.right ||
+        t.clientY < rect.top ||
+        t.clientY > rect.bottom
+      ) continue;
 
-        const r = dirs[key].getBoundingClientRect();
+      const x = t.clientX - cx;
+      const y = t.clientY - cy;
 
-        // ⭐ 押しやすさのカギ（少し広げる）
-        const margin = 14;
+      if (Math.abs(x) < DEAD && Math.abs(y) < DEAD) continue;
 
-        if (
-          t.clientX >= r.left - margin &&
-          t.clientX <= r.right + margin &&
-          t.clientY >= r.top - margin &&
-          t.clientY <= r.bottom + margin
-        ) {
-          next[key] = true;
-        }
+      // ⭐ 同時押しOK
+      if (x > DEAD) {
+        gamepadState.right = true;
+        dirs.right.classList.add("active");
       }
-    }
-
-    // 反映
-    for (let key in dirs) {
-      gamepadState[key] = next[key];
-      dirs[key].classList.toggle("active", next[key]);
+      if (x < -DEAD) {
+        gamepadState.left = true;
+        dirs.left.classList.add("active");
+      }
+      if (y > DEAD) {
+        gamepadState.down = true;
+        dirs.down.classList.add("active");
+      }
+      if (y < -DEAD) {
+        gamepadState.up = true;
+        dirs.up.classList.add("active");
+      }
     }
   }
 
@@ -159,9 +170,7 @@
     const next = { A:false, B:false, X:false, Y:false };
 
     for (let t of e.touches) {
-
       for (let key in btnMap) {
-
         const r = btnMap[key].getBoundingClientRect();
         const margin = 12;
 
