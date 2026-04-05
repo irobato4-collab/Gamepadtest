@@ -7,9 +7,16 @@ window.gamepadState = {
   start:false, select:false, L:false, R:false
 };
 
-// ===== HTML（Dpad削除してzoneだけ）=====
+let useStick = true;
+let joystick = null;
+
+// ===== HTML =====
 document.body.insertAdjacentHTML("beforeend", `
 <div id="zone"></div>
+
+<div id="toggleMode" class="btn small" style="
+  position:absolute; top:20px; left:20px;
+">STICK</div>
 
 <div id="pad">  
   <div id="btnA" class="btn">A</div>  
@@ -27,55 +34,24 @@ document.body.insertAdjacentHTML("beforeend", `
 </div>
 `);
 
-// ===== CSS（Dpad装飾削除）=====
+// ===== CSS =====
 const style = document.createElement("style");
 style.textContent = `
 #zone {
   position:absolute;
   bottom:60px;
   left:60px;
-  width:150px;
-  height:150px;
+  width:190px;
+  height:190px;
   touch-action:none;
 }
 
-#pad {  
-  position:absolute;  
-  bottom:40px;  
-  right:100px;  
-  width:220px;  
-  height:220px;  
-  touch-action:none;  
-}
+.dir { position:absolute; width:100%; height:100%; }
+.up { clip-path: polygon(50% 50%, 0% 0%, 100% 0%); }
+.down { clip-path: polygon(50% 50%, 0% 100%, 100% 100%); }
+.left { clip-path: polygon(50% 50%, 0% 0%, 0% 100%); }
+.right { clip-path: polygon(50% 50%, 100% 0%, 100% 100%); }
 
-/* ===== L R ===== */
-.lr {
-  width:160px !important;
-  height:50px !important;
-  border-radius:6px !important;
-  line-height:50px !important;
-  font-size:18px !important;
-  background:rgba(255,255,255,0.25) !important;
-  border:2px solid rgba(255,255,255,0.6) !important;
-}
-
-#btnL { position:absolute; bottom:340px; left:30px; }
-#btnR { position:absolute; bottom:340px; right:30px; }
-
-/* ===== 中央下 ===== */
-#centerBtns {
-  position:absolute;
-  bottom:10px;
-  left:50%;
-  transform:translateX(-50%);
-  width:160px;
-  height:70px;
-}
-
-#btnSelect { left:0; top:0; }
-#btnStart { right:0; top:0; }
-
-/* ===== ボタン ===== */
 .btn {  
   position:absolute;  
   width:70px;  
@@ -86,33 +62,60 @@ style.textContent = `
   text-align:center;  
   line-height:70px;  
   color:white;  
-  font-size:22px;  
-}  
-
-.small {
-  width:60px;
-  height:60px;
-  line-height:60px;
-  font-size:14px;
 }
 
-.btn.active {  
-  background:rgba(255,255,255,0.7);  
-}  
+.small { width:60px; height:60px; line-height:60px; font-size:14px; }
+
+#pad { position:absolute; bottom:40px; right:100px; width:220px; height:220px; }
 
 #btnA { left:150px; top:80px; }  
 #btnB { left:80px; top:150px; }  
 #btnX { left:80px; top:10px; }  
 #btnY { left:10px; top:80px; }
+
+.lr {
+  width:160px; height:50px; border-radius:6px;
+  line-height:50px;
+}
+#btnL { bottom:340px; left:30px; position:absolute; }
+#btnR { bottom:340px; right:30px; position:absolute; }
+
+#centerBtns {
+  position:absolute;
+  bottom:10px;
+  left:50%;
+  transform:translateX(-50%);
+  width:160px;
+}
 `;
 document.head.appendChild(style);
 
-// ===== nipplejs導入 =====
-const script = document.createElement("script");
-script.src = "nipplejs.min.js"; // ←CDNでもOK
-script.onload = () => {
+// ===== Dpad =====
+function createDpad() {
+  document.getElementById("zone").innerHTML = `
+    <div class="dir up"></div>
+    <div class="dir down"></div>
+    <div class="dir left"></div>
+    <div class="dir right"></div>
+  `;
+}
 
-  const joystick = nipplejs.create({
+// ===== nipplejs（4方向のみ）=====
+function createStick() {
+  document.getElementById("zone").innerHTML = "";
+
+  if (!joystick) {
+    const script = document.createElement("script");
+    script.src = "https://cdn.jsdelivr.net/npm/nipplejs@0.10.1/dist/nipplejs.min.js";
+    script.onload = () => initStick();
+    document.head.appendChild(script);
+  } else {
+    initStick();
+  }
+}
+
+function initStick() {
+  joystick = nipplejs.create({
     zone: document.getElementById('zone'),
     mode: 'static',
     position: { left: '50%', top: '50%' },
@@ -120,22 +123,24 @@ script.onload = () => {
   });
 
   joystick.on('move', (evt, data) => {
-    if (!data.vector) return;
+    if (!useStick || !data.vector) return;
 
     const x = data.vector.x;
     const y = data.vector.y;
 
-    // リセット
     gamepadState.up = false;
     gamepadState.down = false;
     gamepadState.left = false;
     gamepadState.right = false;
 
-    // 判定
-    if (y > 0.5) gamepadState.up = true;
-    if (y < -0.5) gamepadState.down = true;
-    if (x < -0.5) gamepadState.left = true;
-    if (x > 0.5) gamepadState.right = true;
+    // 4方向のみ
+    if (Math.abs(x) > Math.abs(y)) {
+      if (x > 0) gamepadState.right = true;
+      else gamepadState.left = true;
+    } else {
+      if (y > 0) gamepadState.up = true;
+      else gamepadState.down = true;
+    }
   });
 
   joystick.on('end', () => {
@@ -144,52 +149,55 @@ script.onload = () => {
     gamepadState.left = false;
     gamepadState.right = false;
   });
-};
-document.head.appendChild(script);
+}
 
-// ===== ボタン（そのまま）=====
-const btnMap = {
-  A: document.getElementById("btnA"),
-  B: document.getElementById("btnB"),
-  X: document.getElementById("btnX"),
-  Y: document.getElementById("btnY"),
-  start: document.getElementById("btnStart"),
-  select: document.getElementById("btnSelect"),
-  L: document.getElementById("btnL"),
-  R: document.getElementById("btnR")
-};
+// ===== Dpad操作 =====
+function handleDpad(e) {
+  if (useStick) return;
 
-function handlePad(e) {
-  const next = {
-    A:false,B:false,X:false,Y:false,
-    start:false,select:false,L:false,R:false
-  };
+  const rect = zone.getBoundingClientRect();
+  const cx = rect.left + rect.width / 2;
+  const cy = rect.top + rect.height / 2;
+
+  gamepadState.up = false;
+  gamepadState.down = false;
+  gamepadState.left = false;
+  gamepadState.right = false;
 
   for (let t of e.touches) {
-    for (let key in btnMap) {
-      const r = btnMap[key].getBoundingClientRect();
-      const margin = 12;
+    const x = t.clientX - cx;
+    const y = t.clientY - cy;
 
-      if (
-        t.clientX >= r.left - margin &&
-        t.clientX <= r.right + margin &&
-        t.clientY >= r.top - margin &&
-        t.clientY <= r.bottom + margin
-      ) {
-        next[key] = true;
-      }
+    if (Math.abs(x) > Math.abs(y)) {
+      gamepadState.right = x > 0;
+      gamepadState.left = x < 0;
+    } else {
+      gamepadState.down = y > 0;
+      gamepadState.up = y < 0;
     }
-  }
-
-  for (let key in btnMap) {
-    gamepadState[key] = next[key];
-    btnMap[key].classList.toggle("active", next[key]);
   }
 }
 
-document.addEventListener("touchstart", handlePad, { passive:false });
-document.addEventListener("touchmove", handlePad, { passive:false });
-document.addEventListener("touchend", handlePad);
-document.addEventListener("touchcancel", handlePad);
+zone.addEventListener("touchstart", handleDpad);
+zone.addEventListener("touchmove", handleDpad);
+zone.addEventListener("touchend", handleDpad);
+
+// ===== 切り替え =====
+document.getElementById("toggleMode").onclick = () => {
+  useStick = !useStick;
+
+  gamepadState.up = false;
+  gamepadState.down = false;
+  gamepadState.left = false;
+  gamepadState.right = false;
+
+  document.getElementById("toggleMode").textContent = useStick ? "STICK" : "DPAD";
+
+  if (useStick) createStick();
+  else createDpad();
+};
+
+// 初期
+createStick();
 
 })();
