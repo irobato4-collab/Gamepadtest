@@ -3,12 +3,11 @@
 // ===== 状態 =====
 window.gamepadState = {
   up:false, down:false, left:false, right:false,
-  moveX:0, moveY:0, // ←追加（アナログ）
   A:false, B:false, X:false, Y:false,
   start:false, select:false, L:false, R:false
 };
 
-// ===== HTML =====
+// ===== HTML（Dpad削除してzoneだけ）=====
 document.body.insertAdjacentHTML("beforeend", `
 <div id="zone"></div>
 
@@ -28,7 +27,7 @@ document.body.insertAdjacentHTML("beforeend", `
 </div>
 `);
 
-// ===== CSS =====
+// ===== CSS（Dpad装飾削除）=====
 const style = document.createElement("style");
 style.textContent = `
 #zone {
@@ -49,6 +48,7 @@ style.textContent = `
   touch-action:none;  
 }
 
+/* ===== L R ===== */
 .lr {
   width:160px !important;
   height:50px !important;
@@ -62,6 +62,7 @@ style.textContent = `
 #btnL { position:absolute; bottom:340px; left:30px; }
 #btnR { position:absolute; bottom:340px; right:30px; }
 
+/* ===== 中央下 ===== */
 #centerBtns {
   position:absolute;
   bottom:10px;
@@ -74,6 +75,7 @@ style.textContent = `
 #btnSelect { left:0; top:0; }
 #btnStart { right:0; top:0; }
 
+/* ===== ボタン ===== */
 .btn {  
   position:absolute;  
   width:70px;  
@@ -105,9 +107,9 @@ style.textContent = `
 `;
 document.head.appendChild(style);
 
-// ===== nipplejs =====
+// ===== nipplejs導入 =====
 const script = document.createElement("script");
-script.src = "https://cdn.jsdelivr.net/npm/nipplejs@0.10.1/dist/nipplejs.min.js";
+script.src = "nipplejs.min.js"; // ←CDNでもOK
 script.onload = () => {
 
   const joystick = nipplejs.create({
@@ -122,7 +124,6 @@ script.onload = () => {
 
     const x = data.vector.x;
     const y = data.vector.y;
-    const force = Math.min(data.force || 0, 1);
 
     // リセット
     gamepadState.up = false;
@@ -130,28 +131,11 @@ script.onload = () => {
     gamepadState.left = false;
     gamepadState.right = false;
 
-    // デッドゾーン
-    if (force < 0.2) {
-      gamepadState.moveX = 0;
-      gamepadState.moveY = 0;
-      return;
-    }
-
-    // アナログ値
-    gamepadState.moveX = x * force;
-    gamepadState.moveY = y * force;
-
-    // 8方向
-    const angle = Math.atan2(y, x) * (180 / Math.PI);
-
-    if (angle >= -22.5 && angle < 22.5) gamepadState.right = true;
-    else if (angle < 67.5) { gamepadState.up = true; gamepadState.right = true; }
-    else if (angle < 112.5) gamepadState.up = true;
-    else if (angle < 157.5) { gamepadState.up = true; gamepadState.left = true; }
-    else if (angle >= 157.5 || angle < -157.5) gamepadState.left = true;
-    else if (angle < -112.5) { gamepadState.down = true; gamepadState.left = true; }
-    else if (angle < -67.5) gamepadState.down = true;
-    else { gamepadState.down = true; gamepadState.right = true; }
+    // 判定
+    if (y > 0.5) gamepadState.up = true;
+    if (y < -0.5) gamepadState.down = true;
+    if (x < -0.5) gamepadState.left = true;
+    if (x > 0.5) gamepadState.right = true;
   });
 
   joystick.on('end', () => {
@@ -159,13 +143,11 @@ script.onload = () => {
     gamepadState.down = false;
     gamepadState.left = false;
     gamepadState.right = false;
-    gamepadState.moveX = 0;
-    gamepadState.moveY = 0;
   });
 };
 document.head.appendChild(script);
 
-// ===== ボタン =====
+// ===== ボタン（そのまま）=====
 const btnMap = {
   A: document.getElementById("btnA"),
   B: document.getElementById("btnB"),
