@@ -53,13 +53,15 @@ height:220px;
 touch-action:none;  
 }
 
-/* ===== L R（130px版）===== */
+/* ===== L R（完全上書き）===== */
 .lr {
-width:130px !important;
+width:160px !important;
 height:50px !important;
-border-radius:6px !important;
+border-radius:6px !important; /* ←ほぼ四角 */
 line-height:50px !important;
 font-size:18px !important;
+
+/* 半透明 */
 background:rgba(255,255,255,0.25) !important;
 border:2px solid rgba(255,255,255,0.6) !important;
 }
@@ -148,7 +150,7 @@ background:rgba(255,255,255,0.7);
 `;
 document.head.appendChild(style);
 
-// ===== D-pad =====
+// ===== D-pad（そのまま）=====
 const zone = document.getElementById("zone");
 const dirs = {
 up: zone.querySelector(".up"),
@@ -208,7 +210,7 @@ zone.addEventListener("touchmove", handleDpad, { passive:false });
 zone.addEventListener("touchend", handleDpad);
 zone.addEventListener("touchcancel", handleDpad);
 
-// ===== ボタン =====
+// ===== ボタン（そのまま）=====
 const btnMap = {
 A: document.getElementById("btnA"),
 B: document.getElementById("btnB"),
