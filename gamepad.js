@@ -40,8 +40,8 @@ body {
   position:fixed;
   bottom:60px;
   left:60px;
-  width:150px;
-  height:150px;
+  width:220px;
+  height:220px;
   touch-action:none;
 }
 
@@ -139,7 +139,7 @@ script.onload = () => {
     mode: 'static',
     position: { left: '50%', top: '50%' },
     color: 'white'
-    size: 120
+    size: 150
   });
 
   joystick.on('move', (evt, data) => {
