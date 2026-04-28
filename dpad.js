@@ -150,6 +150,8 @@ background:rgba(255,255,255,0.7);
 `;
 document.head.appendChild(style);
 
+  #pad, #btnL, #btnR,#centerBtns { user-select: none; -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; -webkit-touch-callout: none; }
+
 // ===== D-pad（そのまま）=====
 const zone = document.getElementById("zone");
 const dirs = {
