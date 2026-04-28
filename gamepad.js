@@ -72,12 +72,17 @@ background: rgba(255,255,255,0.7) !important;
   bottom:10px;
   left:50%;
   transform:translateX(-50%);
-  width:160px;
+  width:180px;
   height:70px;
+
+  display:flex;
+justify-content:space-between; /* ← 自動で間隔つける */
+align-items:center;
 }
 
-#btnSelect { left:0; top:0; }
-#btnStart { right:0; top:0; }
+#centerBtns .btn {
+position: static;
+}
 
 /* ===== ボタン ===== */
 .btn {  
@@ -94,9 +99,9 @@ background: rgba(255,255,255,0.7) !important;
 }  
 
 .small {
-  width:60px;
-  height:60px;
-  line-height:60px;
+  width: 4.4em;
+  height: 2.2em;
+  line-height: 2.2em;
   font-size:14px;
 }
 
