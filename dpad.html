@@ -4,13 +4,18 @@
 <meta charset="UTF-8">
 
 <style>
+/* ===== リセット（超重要）===== */
 html, body {
   margin: 0;
   padding: 0;
-  width: 100%;
-  height: 100%;
   background: transparent;
-  overflow: hidden;
+}
+
+/* bodyを画面に固定（ズレ防止の核心） */
+body {
+  position: fixed;
+  inset: 0;
+  overflow: visible;
 }
 </style>
 
