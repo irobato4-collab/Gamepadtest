@@ -47,51 +47,45 @@ body {
   color:#000;
   font-weight:bold;
 }
+
+/* 👇 追加 */
+#frame {
+  position:fixed;
+  inset:0;
+  border:none;
+}
 </style>
 </head>
 <body>
 
 <div id="debug"></div>
 <div id="bigInput"></div>
+
+<!-- 👇 iframe追加 -->
+<iframe id="frame"></iframe>
+
 <button id="toggleBtn">dpadに切替</button>
 
 <script>
 let current = "gamepad";
-let currentScript = null;
+const frame = document.getElementById("frame");
+const btn = document.getElementById("toggleBtn");
 
-// ===== script切り替え =====
-function loadScript(src) {
-  if (currentScript) {
-    currentScript.remove();
-    currentScript = null;
-  }
-
-  // UI削除（両対応）
-  document.getElementById("zone")?.remove();
-  document.getElementById("dpad")?.remove();
-
-  // 状態リセット
-  window.gamepadState = {};
-
-  const script = document.createElement("script");
-  script.src = src;
-  document.body.appendChild(script);
-
-  currentScript = script;
+// ===== 切り替え =====
+function load(type) {
+  frame.src = type + ".html";
 }
 
-// 初期読み込み
-loadScript("./gamepad.js");
+// 初期
+load("gamepad");
 
-// ボタン
-const btn = document.getElementById("toggleBtn");
 btn.onclick = () => {
   if (current === "gamepad") {
-    loadScript("./dpad.js");
+    load("dpad");
     current = "dpad";
     btn.textContent = "gamepadに切替";
   } else {
-    loadScript("./gamepad.js");
+    load("gamepad");
     current = "gamepad";
     btn.textContent = "dpadに切替";
   }
@@ -124,7 +118,14 @@ function label(k) {
 
 function update() {
   let html = "";
-  const s = window.gamepadState || {};
+
+  // 👇 iframeから状態を取得
+  let s = {};
+  try {
+    s = frame.contentWindow?.gamepadState || {};
+  } catch(e) {
+    s = {};
+  }
 
   // デバッグ
   keys.forEach(k => {
