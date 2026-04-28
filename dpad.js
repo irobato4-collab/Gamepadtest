@@ -91,10 +91,13 @@ left:50%;
 transform:translateX(-50%);
 width:180px;
 height:70px;
+
+display:flex;
+justify-content:space-between; /* ← 自動で間隔つける */
+align-items:center;
 }
 
-#btnSelect { left:0; top:0; }
-#btnStart { right:0; top:0; }
+
 
 .dir {  
 position:absolute;  
