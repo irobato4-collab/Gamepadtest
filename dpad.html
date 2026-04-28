@@ -4,21 +4,20 @@
 <meta charset="UTF-8">
 
 <style>
-/* ===== 完全リセット ===== */
 html, body {
   margin: 0;
   padding: 0;
   background: transparent;
 }
 
-/* ===== ここが重要（ズレ修正）===== */
+/* 👇 ここが重要 */
 body {
   position: fixed;
   inset: 0;
   overflow: visible;
 
-  /* セーフエリア分を打ち消す */
-  transform: translateY(calc(-1 * env(safe-area-inset-top)));
+  /* セーフエリア分を打ち消す（位置として移動） */
+  top: calc(-1 * env(safe-area-inset-top));
 }
 </style>
 
