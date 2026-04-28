@@ -89,7 +89,7 @@ position:static;
 bottom:10px;
 left:50%;
 transform:translateX(-50%);
-width:200px;
+width:180px;
 height:70px;
 
 display:flex;
@@ -140,9 +140,9 @@ font-size:22px;
 }  
 
 .small {
-width:83px;
-height:48px;
-line-height:60px;
+width: 4.4em;
+height:2.2em;
+line-height:2.2em;
 font-size:14px;
 border-radius:8px;
 }
