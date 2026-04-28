@@ -35,6 +35,35 @@ body {
   font-weight:bold;
   pointer-events:none;
 }
+    /* 右上固定ボタン */
+  .switch-btn {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+
+    padding: 10px 18px;
+    border: none;
+    border-radius: 999px;
+
+    background: linear-gradient(135deg, #3b82f6, #9333ea);
+    color: white;
+    font-size: 14px;
+    font-weight: bold;
+
+    cursor: pointer;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+
+    transition: all 0.2s ease;
+  }
+
+  .switch-btn:hover {
+    transform: translateY(-2px) scale(1.05);
+    box-shadow: 0 6px 20px rgba(0,0,0,0.4);
+  }
+
+  .switch-btn:active {
+    transform: scale(0.95);
+  }
 </style>
 </head>
 <body>
@@ -43,7 +72,11 @@ body {
 <div id="bigInput"></div>
 
 <script src="./gamepad.js"></script>
+<script src="./dpad.js"></script>
+  <script id="dynamicScript"></script>
 
+<button class="switch-btn" onclick="switchScript()">切り替え</button>
+  
 <script>
 const debug = document.getElementById("debug");
 const big = document.getElementById("bigInput");
@@ -103,6 +136,21 @@ function update() {
 }
 
 update();
+  let current = "a.js";
+
+  function switchScript() {
+    const script = document.getElementById("dynamicScript");
+
+    if (current === "a.js") {
+      script.src = "b.js";
+      current = "b.js";
+    } else {
+      script.src = "a.js";
+      current = "a.js";
+    }
+  }
+
+  document.getElementById("dynamicScript").src = current;
 </script>
 
 </body>
