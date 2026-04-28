@@ -85,7 +85,7 @@ right:30px;
 
 /* ===== 中央下 ===== */
 #centerBtns {
-position:absolute;
+position:static;
 bottom:10px;
 left:50%;
 transform:translateX(-50%);
