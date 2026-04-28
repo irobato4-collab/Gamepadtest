@@ -49,15 +49,14 @@ body {
 }
 
 /* 👇 追加 */
-#frame {
+  #frame {
   position: fixed;
-  top: 0;
+  top: -57px;   /* ←これ */
   left: 0;
   width: 100vw;
-  height: 100vh;
+  height: calc(100dvh + 57px); /* ←下も切れないように */
   border: none;
-  z-index: 0;
-}
+  }
 </style>
 </head>
 <body>
