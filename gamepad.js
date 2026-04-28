@@ -62,6 +62,7 @@ style.textContent = `
 #btnL { position:absolute; bottom:340px; left:30px; }
 #btnR { position:absolute; bottom:340px; right:30px; }
 
+#pad, #btnL, #btnR,#centerBtns { user-select: none; -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; -webkit-touch-callout: none; }
 /* ===== 中央下 ===== */
 #centerBtns {
   position:absolute;
@@ -105,7 +106,7 @@ style.textContent = `
 #btnX { left:80px; top:10px; }  
 #btnY { left:10px; top:80px; }
 `;
-  #pad, #btnL, #btnR,#centerBtns { user-select: none; -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; -webkit-touch-callout: none; }
+  
 document.head.appendChild(style);
 
 // ===== nipplejs導入 =====
