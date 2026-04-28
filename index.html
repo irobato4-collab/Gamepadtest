@@ -71,8 +71,7 @@ body {
 <div id="debug"></div>
 <div id="bigInput"></div>
 
-<script src="./gamepad.js"></script>
-<script src="./dpad.js"></script>
+
   <script id="dynamicScript"></script>
 
 <button class="switch-btn" onclick="switchScript()">切り替え</button>
@@ -141,12 +140,12 @@ update();
   function switchScript() {
     const script = document.getElementById("dynamicScript");
 
-    if (current === "a.js") {
-      script.src = "b.js";
-      current = "b.js";
+    if (current === "gamepad.js") {
+      script.src = "dpad.js";
+      current = "dpad.js";
     } else {
-      script.src = "a.js";
-      current = "a.js";
+      script.src = "gamepad.js";
+      current = "gamepad.js";
     }
   }
 
