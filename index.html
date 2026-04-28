@@ -2,7 +2,6 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-
 <title>virtualgamepad Test</title>
 
 <style>
@@ -13,7 +12,7 @@ body {
   font-family:sans-serif;
 }
 
-/* 表示パネル */
+/* デバッグ表示（そのまま） */
 #debug {
   position:fixed;
   top:10px;
@@ -27,17 +26,31 @@ body {
 
 .on { color:#00ff88; }
 .off { color:#666; }
+
+/* 中央の入力表示 */
+#bigInput {
+  position:fixed;
+  top:50%;
+  left:50%;
+  transform:translate(-50%, -50%);
+  font-size:60px;
+  font-weight:bold;
+  color:white;
+  pointer-events:none;
+}
 </style>
 </head>
 <body>
 
 <div id="debug"></div>
+<div id="bigInput"></div>
 
-<!-- ★ ここで君のJSを読み込む -->
+<!-- 君のゲームパッド -->
 <script src="./gamepad.js"></script>
 
 <script>
 const debug = document.getElementById("debug");
+const big = document.getElementById("bigInput");
 
 const keys = [
   "up","down","left","right",
@@ -47,18 +60,35 @@ const keys = [
 
 function update() {
   let html = "";
+  const s = window.gamepadState || {};
 
+  // ===== デバッグ表示 =====
   keys.forEach(k => {
-    const v = window.gamepadState?.[k];
+    const v = s[k];
     html += `<div class="${v ? "on":"off"}">${k}: ${v}</div>`;
   });
 
-  // 同時押し検出
-  const active = keys.filter(k => window.gamepadState?.[k]);
-  html += "<hr>";
-  html += "<div>同時押し: " + (active.join(", ") || "なし") + "</div>";
-
   debug.innerHTML = html;
+
+  // ===== 中央ででっかく表示 =====
+  let text = "";
+
+  if (s.up) text += "↑";
+  if (s.down) text += "↓";
+  if (s.left) text += "←";
+  if (s.right) text += "→";
+
+  if (s.A) text += "A";
+  if (s.B) text += "B";
+  if (s.X) text += "X";
+  if (s.Y) text += "Y";
+  if (s.L) text += "L";
+  if (s.R) text += "R";
+  if (s.start) text += "START";
+  if (s.select) text += "SELECT";
+
+  big.textContent = text;
+
   requestAnimationFrame(update);
 }
 
