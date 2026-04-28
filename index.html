@@ -12,7 +12,6 @@ body {
   font-family:sans-serif;
 }
 
-/* デバッグ */
 #debug {
   position:fixed;
   top:10px;
@@ -27,7 +26,6 @@ body {
 .on { color:#00ff88; }
 .off { color:#666; }
 
-/* 中央表示 */
 #bigInput {
   position:fixed;
   top:50%;
@@ -35,7 +33,6 @@ body {
   transform:translate(-50%, -50%);
   font-size:60px;
   font-weight:bold;
-  color:white;
   pointer-events:none;
 }
 </style>
@@ -57,38 +54,50 @@ const keys = [
   "L","R","start","select"
 ];
 
+// 押された順を保持
+let order = [];
+let prevState = {};
+
+function label(k) {
+  switch(k){
+    case "up": return "↑";
+    case "down": return "↓";
+    case "left": return "←";
+    case "right": return "→";
+    case "start": return "START";
+    case "select": return "SELECT";
+    default: return k;
+  }
+}
+
 function update() {
   let html = "";
   const s = window.gamepadState || {};
 
-  // ===== デバッグ表示 =====
+  // ===== デバッグ =====
   keys.forEach(k => {
     const v = s[k];
     html += `<div class="${v ? "on":"off"}">${k}: ${v}</div>`;
   });
   debug.innerHTML = html;
 
-  // ===== 今押してるものだけ =====
-  let current = [];
+  // ===== 押された瞬間を検出 =====
+  keys.forEach(k => {
+    if (s[k] && !prevState[k]) {
+      // 新しく押された → 右に追加
+      order.push(k);
+    }
+  });
 
-  if (s.up) current.push("↑");
-  if (s.down) current.push("↓");
-  if (s.left) current.push("←");
-  if (s.right) current.push("→");
+  // ===== 離されたキーを削除 =====
+  order = order.filter(k => s[k]);
 
-  if (s.A) current.push("A");
-  if (s.B) current.push("B");
-  if (s.X) current.push("X");
-  if (s.Y) current.push("Y");
+  // ===== 表示 =====
+  const text = order.map(label).join("，");
+  big.textContent = text;
 
-  if (s.L) current.push("L");
-  if (s.R) current.push("R");
-
-  if (s.start) current.push("START");
-  if (s.select) current.push("SELECT");
-
-  // カンマ区切り
-  big.textContent = current.join("，");
+  // 状態保存
+  prevState = {...s};
 
   requestAnimationFrame(update);
 }
