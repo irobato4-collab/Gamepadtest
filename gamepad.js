@@ -38,8 +38,8 @@ body {
 
 #zone {
   position:fixed;
-  bottom:220px;
-  left:220px;
+  bottom:60px;
+  left:60px;
   width:220px;
   height:220px;
   touch-action:none;
