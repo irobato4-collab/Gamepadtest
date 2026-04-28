@@ -139,7 +139,7 @@ script.onload = () => {
   mode: 'static',
   position: { left: '110px', top: '110px' },
   color: 'white',
-  size: 100
+  size: 120
 });
 
   joystick.on('move', (evt, data) => {
