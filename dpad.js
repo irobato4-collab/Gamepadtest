@@ -140,8 +140,8 @@ font-size:22px;
 }  
 
 .small {
-width:60px;
-height:60px;
+width:90px;
+height:48px;
 line-height:60px;
 font-size:14px;
 border-radius:8px;
