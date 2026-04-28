@@ -89,7 +89,7 @@ position:absolute;
 bottom:10px;
 left:50%;
 transform:translateX(-50%);
-width:180px;
+width:200px;
 height:70px;
 
 display:flex;
@@ -140,7 +140,7 @@ font-size:22px;
 }  
 
 .small {
-width:90px;
+width:83px;
 height:48px;
 line-height:60px;
 font-size:14px;
