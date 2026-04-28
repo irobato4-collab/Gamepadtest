@@ -57,21 +57,18 @@ const keys = [
   "L","R","start","select"
 ];
 
-// 履歴
-let history = [];
-
 function update() {
   let html = "";
   const s = window.gamepadState || {};
 
-  // ===== デバッグ =====
+  // ===== デバッグ表示 =====
   keys.forEach(k => {
     const v = s[k];
     html += `<div class="${v ? "on":"off"}">${k}: ${v}</div>`;
   });
   debug.innerHTML = html;
 
-  // ===== 押されているものを取得 =====
+  // ===== 今押してるものだけ =====
   let current = [];
 
   if (s.up) current.push("↑");
@@ -90,13 +87,8 @@ function update() {
   if (s.start) current.push("START");
   if (s.select) current.push("SELECT");
 
-  // ===== 履歴に追加（押しっぱなしでも右に増える）=====
-  if (current.length > 0) {
-    history = history.concat(current);
-  }
-
-  // 表示（カンマ区切り）
-  big.textContent = history.join("，");
+  // カンマ区切り
+  big.textContent = current.join("，");
 
   requestAnimationFrame(update);
 }
