@@ -12,7 +12,7 @@ body {
   font-family:sans-serif;
 }
 
-/* デバッグ表示（そのまま） */
+/* デバッグ */
 #debug {
   position:fixed;
   top:10px;
@@ -27,7 +27,7 @@ body {
 .on { color:#00ff88; }
 .off { color:#666; }
 
-/* 中央の入力表示 */
+/* 中央表示 */
 #bigInput {
   position:fixed;
   top:50%;
@@ -45,7 +45,6 @@ body {
 <div id="debug"></div>
 <div id="bigInput"></div>
 
-<!-- 君のゲームパッド -->
 <script src="./gamepad.js"></script>
 
 <script>
@@ -58,36 +57,46 @@ const keys = [
   "L","R","start","select"
 ];
 
+// 履歴
+let history = [];
+
 function update() {
   let html = "";
   const s = window.gamepadState || {};
 
-  // ===== デバッグ表示 =====
+  // ===== デバッグ =====
   keys.forEach(k => {
     const v = s[k];
     html += `<div class="${v ? "on":"off"}">${k}: ${v}</div>`;
   });
-
   debug.innerHTML = html;
 
-  // ===== 中央ででっかく表示 =====
-  let text = "";
+  // ===== 押されているものを取得 =====
+  let current = [];
 
-  if (s.up) text += "↑";
-  if (s.down) text += "↓";
-  if (s.left) text += "←";
-  if (s.right) text += "→";
+  if (s.up) current.push("↑");
+  if (s.down) current.push("↓");
+  if (s.left) current.push("←");
+  if (s.right) current.push("→");
 
-  if (s.A) text += "A";
-  if (s.B) text += "B";
-  if (s.X) text += "X";
-  if (s.Y) text += "Y";
-  if (s.L) text += "L";
-  if (s.R) text += "R";
-  if (s.start) text += "START";
-  if (s.select) text += "SELECT";
+  if (s.A) current.push("A");
+  if (s.B) current.push("B");
+  if (s.X) current.push("X");
+  if (s.Y) current.push("Y");
 
-  big.textContent = text;
+  if (s.L) current.push("L");
+  if (s.R) current.push("R");
+
+  if (s.start) current.push("START");
+  if (s.select) current.push("SELECT");
+
+  // ===== 履歴に追加（押しっぱなしでも右に増える）=====
+  if (current.length > 0) {
+    history = history.concat(current);
+  }
+
+  // 表示（カンマ区切り）
+  big.textContent = history.join("，");
 
   requestAnimationFrame(update);
 }
