@@ -57,18 +57,18 @@ touch-action:none;
 
 /* ===== L R（完全上書き）===== */
 .lr {
-width:160px !important;
-height:50px !important;
-border-radius:6px !important; /* ←ほぼ四角 */
-line-height:50px !important;
-font-size:18px !important;
+width:160px;
+height:50px;
+border-radius:6px; /* ←ほぼ四角 */
+line-height:50px;
+font-size:18px;
 
 /* 半透明 */
-background:rgba(255,255,255,0.25) !important;
-border:2px solid rgba(255,255,255,0.6) !important;
+background:rgba(255,255,255,0.25);
+border:2px solid rgba(255,255,255,0.6);
 }
 lr.active {
-background: rgba(255,255,255,0.7) !important;
+background: rgba(255,255,255,0.7);
 }
 
 #btnL {
