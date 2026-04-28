@@ -67,6 +67,9 @@ font-size:18px !important;
 background:rgba(255,255,255,0.25) !important;
 border:2px solid rgba(255,255,255,0.6) !important;
 }
+lr.active {
+background: rgba(255,255,255,0.7) !important;
+}
 
 #btnL {
 position:absolute;
