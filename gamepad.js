@@ -22,8 +22,8 @@ document.body.insertAdjacentHTML("beforeend", `
 <div id="btnR" class="btn lr">R</div>
 
 <div id="centerBtns">
-  <div id="btnSelect" class="btn small">SEL</div>
-  <div id="btnStart" class="btn small">STA</div>
+  <div id="btnSelect" class="btn small">select</div>
+  <div id="btnStart" class="btn small">start</div>
 </div>
 `);
 
@@ -103,6 +103,7 @@ position: static;
   height: 2.2em;
   line-height: 2.2em;
   font-size:14px;
+  border-radious:8px;
 }
 
 .btn.active {  
