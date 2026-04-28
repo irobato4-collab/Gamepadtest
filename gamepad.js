@@ -40,8 +40,8 @@ body {
   position:fixed;
   bottom:60px;
   left:60px;
-  width:200px;
-  height:200px;
+  width:150px;
+  height:150px;
   touch-action:none;
 }
 
