@@ -103,7 +103,7 @@ position: static;
   height: 2.2em;
   line-height: 2.2em;
   font-size:14px;
-  border-radious:8px;
+  border-radius:8px;
 }
 
 .btn.active {  
