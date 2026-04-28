@@ -7,7 +7,7 @@ window.gamepadState = {
   start:false, select:false, L:false, R:false
 };
 
-// ===== HTML（Dpad削除してzoneだけ）=====
+// ===== HTML =====
 document.body.insertAdjacentHTML("beforeend", `
 <div id="zone"></div>
 
@@ -27,11 +27,17 @@ document.body.insertAdjacentHTML("beforeend", `
 </div>
 `);
 
-// ===== CSS（Dpad装飾削除）=====
+// ===== CSS（fixed化）=====
 const style = document.createElement("style");
 style.textContent = `
+body {
+  margin:0;
+  background:transparent;
+  overflow:hidden;
+}
+
 #zone {
-  position:absolute;
+  position:fixed;
   bottom:60px;
   left:60px;
   width:150px;
@@ -40,7 +46,7 @@ style.textContent = `
 }
 
 #pad {  
-  position:absolute;  
+  position:fixed;  
   bottom:40px;  
   right:100px;  
   width:220px;  
@@ -59,16 +65,21 @@ style.textContent = `
   border:2px solid rgba(255,255,255,0.6) !important;
 }
 .lr.active {
-background: rgba(255,255,255,0.7) !important;
+  background: rgba(255,255,255,0.7) !important;
 }
 
-#btnL { position:absolute; bottom:340px; left:30px; }
-#btnR { position:absolute; bottom:340px; right:30px; }
+#btnL { position:fixed; bottom:340px; left:30px; }
+#btnR { position:fixed; bottom:340px; right:30px; }
 
-#pad, #btnL, #btnR,#centerBtns { user-select: none; -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; -webkit-touch-callout: none; }
-/* ===== 中央下 ===== */
+#pad, #btnL, #btnR, #centerBtns {
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+}
+
+/* ===== 中央 ===== */
 #centerBtns {
-  position:absolute;
+  position:fixed;
   bottom:10px;
   left:50%;
   transform:translateX(-50%);
@@ -76,12 +87,12 @@ background: rgba(255,255,255,0.7) !important;
   height:70px;
 
   display:flex;
-justify-content:space-between; /* ← 自動で間隔つける */
-align-items:center;
+  justify-content:space-between;
+  align-items:center;
 }
 
 #centerBtns .btn {
-position: static;
+  position: static;
 }
 
 /* ===== ボタン ===== */
@@ -115,12 +126,12 @@ position: static;
 #btnX { left:80px; top:10px; }  
 #btnY { left:10px; top:80px; }
 `;
-  
+
 document.head.appendChild(style);
 
-// ===== nipplejs導入 =====
+// ===== nipplejs =====
 const script = document.createElement("script");
-script.src = "nipplejs.min.js"; // ←CDNでもOK
+script.src = "nipplejs.min.js";
 script.onload = () => {
 
   const joystick = nipplejs.create({
@@ -136,17 +147,10 @@ script.onload = () => {
     const x = data.vector.x;
     const y = data.vector.y;
 
-    // リセット
-    gamepadState.up = false;
-    gamepadState.down = false;
-    gamepadState.left = false;
-    gamepadState.right = false;
-
-    // 判定
-    if (y > 0.5) gamepadState.up = true;
-    if (y < -0.5) gamepadState.down = true;
-    if (x < -0.5) gamepadState.left = true;
-    if (x > 0.5) gamepadState.right = true;
+    gamepadState.up = y > 0.5;
+    gamepadState.down = y < -0.5;
+    gamepadState.left = x < -0.5;
+    gamepadState.right = x > 0.5;
   });
 
   joystick.on('end', () => {
@@ -158,7 +162,7 @@ script.onload = () => {
 };
 document.head.appendChild(script);
 
-// ===== ボタン（そのまま）=====
+// ===== ボタン =====
 const btnMap = {
   A: document.getElementById("btnA"),
   B: document.getElementById("btnB"),
