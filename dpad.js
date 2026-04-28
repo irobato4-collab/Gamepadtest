@@ -32,11 +32,17 @@ document.body.insertAdjacentHTML("beforeend", `
 </div>
 `);
 
-// ===== CSS =====
+// ===== CSS（fixed化のみ）=====
 const style = document.createElement("style");
 style.textContent = `
+body {
+  margin:0;
+  background:transparent;
+  overflow:hidden;
+}
+
 #zone {
-position:absolute;
+position:fixed;
 bottom:60px;
 left:60px;
 width:190px;
@@ -45,7 +51,7 @@ touch-action:none;
 }
 
 #pad {  
-position:absolute;  
+position:fixed;  
 bottom:40px;  
 right:100px;  
 width:220px;  
@@ -53,17 +59,19 @@ height:220px;
 touch-action:none;  
 }
 
-#pad, #btnL, #btnR,#centerBtns { user-select: none; -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; -webkit-touch-callout: none; }
+#pad, #btnL, #btnR,#centerBtns {
+user-select: none;
+-webkit-user-select: none;
+-webkit-touch-callout: none;
+}
 
-/* ===== L R（完全上書き）===== */
+/* ===== L R ===== */
 .lr {
 width:160px !important;
 height:50px !important;
-border-radius:6px !important; /* ←ほぼ四角 */
+border-radius:6px !important;
 line-height:50px !important;
 font-size:18px !important;
-
-/* 半透明 */
 background:rgba(255,255,255,0.25) !important;
 border:2px solid rgba(255,255,255,0.6) !important;
 }
@@ -72,20 +80,20 @@ background: rgba(255,255,255,0.7) !important;
 }
 
 #btnL {
-position:absolute;
+position:fixed;
 bottom:340px;
 left:30px;
 }
 
 #btnR {
-position:absolute;
+position:fixed;
 bottom:340px;
 right:30px;
 }
 
-/* ===== 中央下 ===== */
+/* ===== 中央 ===== */
 #centerBtns {
-position:absolute;
+position:fixed;
 bottom:10px;
 left:50%;
 transform:translateX(-50%);
@@ -93,7 +101,7 @@ width:180px;
 height:70px;
 
 display:flex;
-justify-content:space-between; /* ← 自動で間隔つける */
+justify-content:space-between;
 align-items:center;
 }
 
@@ -101,6 +109,7 @@ align-items:center;
 position: static;
 }
 
+/* ===== D-pad ===== */
 .dir {  
 position:absolute;  
 width:100%;  
@@ -128,6 +137,7 @@ opacity:0.5;
 .left::before { width:100px; height:55px; transform:translate(-100%, -50%); }  
 .right::before { width:100px; height:55px; transform:translate(0%, -50%); }  
 
+/* ===== ボタン ===== */
 .btn {  
 position:absolute;  
 width:70px;  
@@ -157,8 +167,8 @@ background:rgba(255,255,255,0.7);
 #btnB { left:80px; top:150px; }  
 #btnX { left:80px; top:10px; }  
 #btnY { left:10px; top:80px; }
-
 `;
+
 document.head.appendChild(style);
 
 // ===== D-pad（そのまま）=====
