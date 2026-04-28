@@ -93,8 +93,8 @@ width:180px;
 height:70px;
 }
 
-#btnSelect { left:5; top:0; }
-#btnStart { right:5; top:0; }
+#btnSelect { left:0; top:0; }
+#btnStart { right:0; top:0; }
 
 .dir {  
 position:absolute;  
