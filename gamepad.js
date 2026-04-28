@@ -135,11 +135,12 @@ script.src = "nipplejs.min.js";
 script.onload = () => {
 
   const joystick = nipplejs.create({
-    zone: document.getElementById('zone'),
-    mode: 'static',
-    position: { left: '50%', top: '50%' },
-    color: 'white'
-  });
+  zone: document.getElementById('zone'),
+  mode: 'static',
+  position: { left: '110px', top: '110px' },
+  color: 'white',
+  size: 160
+});
 
   joystick.on('move', (evt, data) => {
     if (!data.vector) return;
