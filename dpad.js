@@ -85,7 +85,7 @@ right:30px;
 
 /* ===== 中央下 ===== */
 #centerBtns {
-position:static;
+position:absolute;
 bottom:10px;
 left:50%;
 transform:translateX(-50%);
@@ -97,7 +97,9 @@ justify-content:space-between; /* ← 自動で間隔つける */
 align-items:center;
 }
 
-
+#centerBtns .btn {
+position: static;
+}
 
 .dir {  
 position:absolute;  
