@@ -35,16 +35,69 @@ body {
   font-weight:bold;
   pointer-events:none;
 }
-    
+
+#toggleBtn {
+  position:fixed;
+  bottom:20px;
+  right:20px;
+  padding:10px 16px;
+  border:none;
+  border-radius:8px;
+  background:#00ff88;
+  color:#000;
+  font-weight:bold;
+}
 </style>
 </head>
 <body>
 
 <div id="debug"></div>
 <div id="bigInput"></div>
+<button id="toggleBtn">dpadに切替</button>
 
-  <script src="./gamepad.js">
 <script>
+let current = "gamepad";
+let currentScript = null;
+
+// ===== script切り替え =====
+function loadScript(src) {
+  if (currentScript) {
+    currentScript.remove();
+    currentScript = null;
+  }
+
+  // UI削除（両対応）
+  document.getElementById("zone")?.remove();
+  document.getElementById("dpad")?.remove();
+
+  // 状態リセット
+  window.gamepadState = {};
+
+  const script = document.createElement("script");
+  script.src = src;
+  document.body.appendChild(script);
+
+  currentScript = script;
+}
+
+// 初期読み込み
+loadScript("./gamepad.js");
+
+// ボタン
+const btn = document.getElementById("toggleBtn");
+btn.onclick = () => {
+  if (current === "gamepad") {
+    loadScript("./dpad.js");
+    current = "dpad";
+    btn.textContent = "gamepadに切替";
+  } else {
+    loadScript("./gamepad.js");
+    current = "gamepad";
+    btn.textContent = "dpadに切替";
+  }
+};
+
+// ===== 入力表示 =====
 const debug = document.getElementById("debug");
 const big = document.getElementById("bigInput");
 
@@ -54,7 +107,6 @@ const keys = [
   "L","R","start","select"
 ];
 
-// 押された順を保持
 let order = [];
 let prevState = {};
 
@@ -74,36 +126,31 @@ function update() {
   let html = "";
   const s = window.gamepadState || {};
 
-  // ===== デバッグ =====
+  // デバッグ
   keys.forEach(k => {
     const v = s[k];
     html += `<div class="${v ? "on":"off"}">${k}: ${v}</div>`;
   });
   debug.innerHTML = html;
 
-  // ===== 押された瞬間を検出 =====
+  // 押された瞬間
   keys.forEach(k => {
     if (s[k] && !prevState[k]) {
-      // 新しく押された → 右に追加
       order.push(k);
     }
   });
 
-  // ===== 離されたキーを削除 =====
+  // 離されたら削除
   order = order.filter(k => s[k]);
 
-  // ===== 表示 =====
-  const text = order.map(label).join("，");
-  big.textContent = text;
+  // 表示
+  big.textContent = order.map(label).join("，");
 
-  // 状態保存
   prevState = {...s};
-
   requestAnimationFrame(update);
 }
 
 update();
-
 </script>
 
 </body>
